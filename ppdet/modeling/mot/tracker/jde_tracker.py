@@ -351,3 +351,4 @@ class JDETracker(object):
                 [track.track_id for track in removed_tracks_dict[cls_id]]))
 
         return output_tracks_dict
+
