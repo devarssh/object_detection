@@ -374,4 +374,3 @@ class OptimizerBuilder():
                   parameters=params,
                   grad_clip=grad_clip,
                   **optim_args)
-

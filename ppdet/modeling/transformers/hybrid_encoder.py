@@ -544,4 +544,3 @@ class DFINEHybridEncoder(HybridEncoder):
                     act=act))
 
         self._reset_parameters()
-

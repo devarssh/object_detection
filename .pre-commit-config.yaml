@@ -38,4 +38,3 @@ repos:
         entry: bash ./.travis/codestyle/cpplint_pre_commit.hook
         language: system
         files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$
-

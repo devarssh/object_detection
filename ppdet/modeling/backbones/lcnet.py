@@ -295,4 +295,3 @@ class LCNet(nn.Layer):
     @property
     def out_shape(self):
         return [ShapeSpec(channels=c) for c in self._out_channels]
-

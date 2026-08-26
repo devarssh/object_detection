@@ -1668,7 +1668,3 @@ class Trainer(object):
                     setattr(layer, name, new_sublayer)
 
         return layer
-
-
-
-

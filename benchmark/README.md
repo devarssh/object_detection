@@ -45,4 +45,3 @@ CUDA_VISIBLE_DEVICES=0 bash benchmark/run_benchmark.sh sp 2 fp32 1 faster_rcnn
 # 多卡
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash benchmark/run_benchmark.sh mp 2 fp32 1 faster_rcnn
 ```
-

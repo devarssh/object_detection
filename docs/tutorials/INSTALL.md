@@ -136,4 +136,3 @@ An image of the same name with the predicted result will be generated under the 
 The result is as shown below：
 
 ![](../images/000000014439.jpg)
-

@@ -136,4 +136,3 @@ class Weighted_FocalLoss(FocalLoss):
                 raise ValueError('avg_factor can not be used with reduction="sum"')
 
         return loss * self.loss_weight
-

@@ -621,4 +621,3 @@ class SemiTrainReader(BaseSemiDataLoader):
             sample_transforms, weak_aug, strong_aug, sup_batch_transforms,
             unsup_batch_transforms, sup_batch_size, unsup_batch_size, shuffle,
             drop_last, num_classes, collate_batch, **kwargs)
-

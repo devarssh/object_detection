@@ -402,4 +402,3 @@ class CSPDarkNet(nn.Layer):
                 channels=c, stride=s)
             for c, s in zip(self._out_channels, self.strides)
         ]
-

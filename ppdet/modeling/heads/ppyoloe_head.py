@@ -717,4 +717,3 @@ class SimpleConvHead(nn.Layer):
         cls_scores = paddle.concat(cls_scores, axis=1)
         bbox_preds = paddle.concat(bbox_preds, axis=1)
         return cls_scores, bbox_preds
-

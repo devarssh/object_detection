@@ -76,4 +76,3 @@ def setup_logger(name="ppdet", output=None, log_ranks="0"):
 
     logger_initialized.append(name)
     return logger
-

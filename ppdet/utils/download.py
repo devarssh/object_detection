@@ -558,4 +558,3 @@ def _move_and_merge_tree(src, dst):
             elif osp.isfile(src_fp) and \
                     not osp.isfile(dst_fp):
                 shutil.move(src_fp, dst_fp)
-

@@ -617,4 +617,3 @@ class Res5Head(nn.Layer):
     def forward(self, roi_feat, stage=0):
         y = self.res5(roi_feat)
         return y
-
