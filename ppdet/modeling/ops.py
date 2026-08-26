@@ -1078,3 +1078,4 @@ def get_static_shape(tensor):
     shape = paddle.shape(tensor)
     shape.stop_gradient = True
     return shape
+
