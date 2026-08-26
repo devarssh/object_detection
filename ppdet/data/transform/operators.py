@@ -5116,3 +5116,4 @@ class UpdateBBoxFromMask(BaseOperator):
                 sample['gt_poly'] = []
 
         return sample
+
