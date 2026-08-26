@@ -196,3 +196,4 @@ def json_eval_results(metric, json_directory, dataset):
             cocoapi_eval(v_json, coco_eval_style[i], anno_file=anno_file)
         else:
             logger.info("{} not exists!".format(v_json))
+
