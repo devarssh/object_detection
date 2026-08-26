@@ -530,3 +530,4 @@ class DINOTransformer(nn.Layer):
 
         return target, reference_points_unact.detach(
         ), enc_topk_bboxes, enc_topk_logits
+
