@@ -87,3 +87,4 @@ class PTQ(object):
                              input_spec=None):
         self.ptq.save_quantized_model(quant_model, quantize_model_path,
                                       input_spec)
+
