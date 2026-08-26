@@ -82,3 +82,4 @@ python deploy/benchmark/log_parser_excel.py --log_path=./output_pipeline --outpu
 
 - 3、cuDNN 8.0.4连续预测会发生内存泄漏吗？
   经QA测试，发现cuDNN 8系列连续预测时都有内存泄漏问题，且cuDNN 8性能差于cuDNN 7，推荐使用CUDA + cuDNN7.6.4的方式进行部署。
+
