@@ -1,12 +1,12 @@
-## 服务器端实用目标检测方案
+## Practical Server Side Detection
 
-### 简介
+### Introduction
 
-* 近年来，学术界和工业界广泛关注图像中目标检测任务。基于[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)中SSLD蒸馏方案训练得到的ResNet50_vd预训练模型(ImageNet1k验证集上Top1 Acc为82.39%)，结合PaddleDetection中的丰富算子，飞桨提供了一种面向服务器端实用的目标检测方案PSS-DET(Practical Server Side Detection)。基于COCO2017目标检测数据集，V100单卡预测速度为61FPS时，COCO mAP可达41.2%。
+* In recent years, the object detection task in image has been widely concerned by academia and industry. ResNet50vd pretraining model based on SSLD distillation program training in [PaddleClas](https://github.com/PaddlePaddle/PaddleClas) (Top1 on ImageNet1k verification set) Acc is 82.39%), combined with the rich operator of PaddleDetection, PaddlePaddle provides a practical server side detection scheme PSS-DET(Practical Server Side Detection). Based on COCO2017 object detection dataset, V100 single gpu prediction speed is 61FPS, COCO mAP can reach 41.2%.
 
 
-### 模型库
+### Model library
 
-| 骨架网络             | 网络类型       | 每张GPU图片个数 | 学习率策略 |推理时间(fps) | Box AP | Mask AP |                           下载                          | 配置文件 |
-| :---------------------- | :-------------:  | :-------: | :-----: | :------------: | :----: | :-----: | :-------------: | :-----: |
-| ResNet50-vd-FPN-Dcnv2         | Faster     |     2     |   3x    |     61.425     |  41.5  |    -    | [下载链接](https://paddledet.bj.bcebos.com/models/faster_rcnn_enhance_3x_coco.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rcnn_enhance/faster_rcnn_enhance_3x_coco.yml) |
+| Backbone              | Network type | Number of images per GPU | Learning rate strategy | Inferring time(fps) | Box AP | Mask AP |                                      Download                                       |                                                           Configuration File                                                            |
+| :-------------------- | :----------: | :----------------------: | :--------------------: | :-----------------: | :----: | :-----: | :---------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------: |
+| ResNet50-vd-FPN-Dcnv2 |    Faster    |            2             |           3x           |       61.425        |  41.5  |    -    | [link](https://paddledet.bj.bcebos.com/models/faster_rcnn_enhance_3x_coco.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rcnn_enhance/faster_rcnn_enhance_3x_coco.yml) |

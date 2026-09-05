@@ -1,99 +1,29 @@
-简体中文 | [English](PrepareMOTDataSet_en.md)
 
-# 多目标跟踪数据集准备
-## 目录
-- [简介和模型选型](#简介和模型选型)
-- [MOT数据集准备](#MOT数据集准备)
-    - [SDE数据集](#SDE数据集)
-    - [JDE数据集](#JDE数据集)
-- [用户自定义数据集准备](#用户自定义数据集准备)
-    - [SDE数据集](#SDE数据集)
-    - [JDE数据集](#JDE数据集)
-- [引用](#引用)
+# Contents
+## Multi-Object Tracking Dataset Preparation
+- [MOT Dataset](#MOT_Dataset)
+- [Dataset Directory](#Dataset_Directory)
+- [Data Format](#Data_Format)
+- [Custom Dataset Preparation](#Custom_Dataset_Preparation)
+- [Citations](#Citations)
 
-## 简介和模型选型
-PaddleDetection中提供了SDE和JDE两个系列的多种算法实现：
-- SDE(Separate Detection and Embedding)
-    - [ByteTrack](../../../configs/mot/bytetrack)
-    - [DeepSORT](../../../configs/mot/deepsort)
+### MOT Dataset
+PaddleDetection implement [JDE](https://github.com/Zhongdao/Towards-Realtime-MOT) and [FairMOT](https://github.com/ifzhang/FairMOT), and use the same training data named 'MIX' as them, including **Caltech Pedestrian, CityPersons, CUHK-SYSU, PRW, ETHZ, MOT17 and MOT16**. The former six are used as the mixed dataset for training, and MOT16 are used as the evaluation dataset. If you want to use these datasets, please **follow their licenses**.
 
-- JDE(Joint Detection and Embedding)
-    - [JDE](../../../configs/mot/jde)
-    - [FairMOT](../../../configs/mot/fairmot)
-    - [MCFairMOT](../../../configs/mot/mcfairmot)
+**Notes:**
+- Multi-Object Tracking(MOT) datasets are always used for single category tracking. DeepSORT, JDE and FairMOT are single category MOT models. 'MIX' dataset and it's sub datasets are also single category pedestrian tracking datasets. It can be considered that there are additional IDs ground truth for detection datasets.
+- In order to train the feature models of more scenes, more datasets are also processed into the same format as the MIX dataset. PaddleDetection Team also provides feature datasets and models of [vehicle tracking](../../configs/mot/vehicle/readme.md), [head tracking](../../configs/mot/headtracking21/readme.md) and more general [pedestrian tracking](../../configs/mot/pedestrian/readme.md). User defined datasets can also be prepared by referring to this data preparation doc.
+- The multipe category MOT model is [MCFairMOT] (../../configs/mot/mcfairmot/readme_cn.md), and the multi category dataset is the integrated version of VisDrone dataset. Please refer to the doc of [MCFairMOT](../../configs/mot/mcfairmot/README.md).
+- The Multi-Target Multi-Camera Tracking (MTMCT) model is [AIC21 MTMCT](https://www.aicitychallenge.org)(CityFlow) Multi-Camera Vehicle Tracking dataset. The dataset and model can refer to the doc of [MTMCT](../../configs/mot/mtmct/README.md).
 
-**注意：**
-  - 以上算法原论文均为单类别的多目标跟踪，PaddleDetection团队同时也支持了[ByteTrack](./bytetrack)和FairMOT([MCFairMOT](./mcfairmot))的多类别的多目标跟踪；
-  - [DeepSORT](../../../configs/mot/deepsort)和[JDE](../../../configs/mot/jde)均只支持单类别的多目标跟踪；
-  - [DeepSORT](../../../configs/mot/deepsort)需要额外添加ReID权重一起执行，[ByteTrack](../../../configs/mot/bytetrack)可加可不加ReID权重，默认不加；
-
-
-关于模型选型，PaddleDetection团队提供的总结建议如下：
-
-|    MOT方式      |   经典算法      |  算法流程 |  数据集要求  |  其他特点  |
-| :--------------| :--------------| :------- | :----: | :----: |
-| SDE系列  | DeepSORT,ByteTrack | 分离式，两个独立模型权重先检测后ReID，也可不加ReID | 检测和ReID数据相对独立，不加ReID时即纯检测数据集 |检测和ReID可分别调优，鲁棒性较高，AI竞赛常用|
-| JDE系列  | FairMOT | 联合式，一个模型权重端到端同时检测和ReID | 必须同时具有检测和ReID标注 | 检测和ReID联合训练，不易调优，泛化性不强|
-
-**注意：**
-  - 由于数据标注的成本较大，建议选型前优先考虑**数据集要求**，如果数据集只有检测框标注而没有ReID标注，是无法使用JDE系列算法训练的，更推荐使用SDE系列；
-  - SDE系列算法在检测器精度足够高时，也可以不使用ReID权重进行物体间的长时序关联，可以参照[ByteTrack](bytetrack)；
-  - 耗时速度和模型权重参数量计算量有一定关系，耗时从理论上看`不使用ReID的SDE系列 < JDE系列 < 使用ReID的SDE系列`；
-
-
-## MOT数据集准备
-PaddleDetection团队提供了众多公开数据集或整理后数据集的下载链接，参考[数据集下载汇总](../../../configs/mot/DataDownload.md)，用户可以自行下载使用。
-
-根据模型选型总结，MOT数据集可以分为两类：一类纯检测框标注的数据集，仅SDE系列可以使用；另一类是同时有检测和ReID标注的数据集，SDE系列和JDE系列都可以使用。
-
-### SDE数据集
-SDE数据集是纯检测标注的数据集，用户自定义数据集可以参照[DET数据准备文档](./PrepareDetDataSet.md)准备。
-
-以MOT17数据集为例，下载并解压放在`PaddleDetection/dataset/mot`目录下：
-```
-wget https://bj.bcebos.com/v1/paddledet/data/mot/MOT17.zip
-
-```
-并修改数据集部分的配置文件如下：
-```
-num_classes: 1
-
-TrainDataset:
-  !COCODataSet
-    dataset_dir: dataset/mot/MOT17
-    anno_path: annotations/train_half.json
-    image_dir: images/train
-    data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
-
-EvalDataset:
-  !COCODataSet
-    dataset_dir: dataset/mot/MOT17
-    anno_path: annotations/val_half.json
-    image_dir: images/train
-
-TestDataset:
-  !ImageFolder
-    dataset_dir: dataset/mot/MOT17
-    anno_path: annotations/val_half.json
-```
-
-数据集目录为：
-```
-dataset/mot
-        |——————MOT17
-                |——————annotations
-                |——————images
-```
-
-### JDE数据集
-JDE数据集是同时有检测和ReID标注的数据集，首先按照以下命令`image_lists.zip`并解压放在`PaddleDetection/dataset/mot`目录下：
+### Dataset Directory
+First, download the image_lists.zip using the following command, and unzip them into `PaddleDetection/dataset/mot`:
 ```
 wget https://bj.bcebos.com/v1/paddledet/data/mot/image_lists.zip
 ```
 
-然后按照以下命令可以快速下载各个公开数据集，也解压放在`PaddleDetection/dataset/mot`目录下：
+Then, download the MIX dataset using the following command, and unzip them into `PaddleDetection/dataset/mot`:
 ```
-# MIX数据，同JDE,FairMOT论文使用的数据集
 wget https://bj.bcebos.com/v1/paddledet/data/mot/MOT17.zip
 wget https://bj.bcebos.com/v1/paddledet/data/mot/Caltech.zip
 wget https://bj.bcebos.com/v1/paddledet/data/mot/CUHKSYSU.zip
@@ -102,17 +32,24 @@ wget https://bj.bcebos.com/v1/paddledet/data/mot/Cityscapes.zip
 wget https://bj.bcebos.com/v1/paddledet/data/mot/ETHZ.zip
 wget https://bj.bcebos.com/v1/paddledet/data/mot/MOT16.zip
 ```
-数据集目录为：
+
+The final directory is:
 ```
 dataset/mot
   |——————image_lists
+            |——————caltech.10k.val  
             |——————caltech.all  
+            |——————caltech.train  
+            |——————caltech.val  
             |——————citypersons.train  
+            |——————citypersons.val  
             |——————cuhksysu.train  
+            |——————cuhksysu.val  
             |——————eth.train  
             |——————mot16.train  
             |——————mot17.train  
             |——————prw.train  
+            |——————prw.val
   |——————Caltech
   |——————Cityscapes
   |——————CUHKSYSU
@@ -122,8 +59,8 @@ dataset/mot
   |——————PRW
 ```
 
-#### JDE数据集的格式
-这几个相关数据集都遵循以下结构：
+### Data Format
+These several relevant datasets have the following structure:
 ```
 MOT17
    |——————images
@@ -132,30 +69,21 @@ MOT17
    └——————labels_with_ids
             └——————train
 ```
-所有数据集的标注是以统一数据格式提供的。各个数据集中每张图片都有相应的标注文本。给定一个图像路径，可以通过将字符串`images`替换为`labels_with_ids`并将`.jpg`替换为`.txt`来生成标注文本路径。在标注文本中，每行都描述一个边界框，格式如下：
+Annotations of these datasets are provided in a unified format. Every image has a corresponding annotation text. Given an image path, the annotation text path can be generated by replacing the string `images` with `labels_with_ids` and replacing `.jpg` with `.txt`.
+
+In the annotation text, each line is describing a bounding box and has the following format:
 ```
 [class] [identity] [x_center] [y_center] [width] [height]
 ```
-  - `class`为类别id，支持单类别和多类别，从`0`开始计，单类别即为`0`。
-  - `identity`是从`1`到`num_identities`的整数(`num_identities`是数据集中所有视频或图片序列的不同物体实例的总数)，如果此框没有`identity`标注，则为`-1`。
-  - `[x_center] [y_center] [width] [height]`是中心点坐标和宽高，注意他们的值是由图片的宽度/高度标准化的，因此它们是从0到1的浮点数。
+**Notes:**
+- `class` is the class id, support single class and multi-class, start from `0`, and for single class is `0`.
+- `identity` is an integer from `1` to `num_identities`(`num_identities` is the total number of instances of objects in the dataset), or `-1` if this box has no identity annotation.
+- `[x_center] [y_center] [width] [height]` are the center coordinates, width and height, note that they are normalized by the width/height of the image, so they are floating point numbers ranging from 0 to 1.
 
 
-**注意：**
-  - MIX数据集是[JDE](https://github.com/Zhongdao/Towards-Realtime-MOT)和[FairMOT](https://github.com/ifzhang/FairMOT)原论文使用的数据集，包括**Caltech Pedestrian, CityPersons, CUHK-SYSU, PRW, ETHZ, MOT17和MOT16**。使用前6者作为联合数据集参与训练，MOT16作为评测数据集。如果您想使用这些数据集，请**遵循他们的License**。
-  - MIX数据集以及其子数据集都是单类别的行人跟踪数据集，可认为相比于行人检测数据集多了id号的标注。
-  - 更多场景的垂类模型例如车辆行人人头跟踪等，垂类数据集也需要处理成与MIX数据集相同的格式，参照[数据集下载汇总](DataDownload.md)、[车辆跟踪](vehicle/README_cn.md)、[人头跟踪](headtracking21/README_cn.md)以及更通用的[行人跟踪](pedestrian/README_cn.md)。
-  - 用户自定义数据集可参照[MOT数据集准备教程](../../docs/tutorials/PrepareMOTDataSet_cn.md)去准备。
+### Custom Dataset Preparation
 
-
-## 用户自定义数据集准备
-
-### SDE数据集
-如果用户选择SDE系列方案，是准备准检测标注的自定义数据集，则可以参照[DET数据准备文档](./PrepareDetDataSet.md)准备。
-
-### JDE数据集
-如果用户选择JDE系列方案，则需要同时具有检测和ReID标注，且符合MOT-17数据集的格式。
-为了规范地进行训练和评测，用户数据需要转成和MOT-17数据集相同的目录和格式：
+In order to standardize training and evaluation, custom data needs to be converted into the same directory and format as MOT-16 dataset:
 ```
 custom_data
    |——————images
@@ -181,58 +109,56 @@ custom_data
                     └—————— ...
 ```
 
-##### images文件夹
-  - `gt.txt`是原始标注文件，而训练所用标注是`labels_with_ids`文件夹。
-  - `gt.txt`里是当前视频中所有图片的原始标注文件，每行都描述一个边界框，格式如下：
-    ```
-    [frame_id],[identity],[bb_left],[bb_top],[width],[height],[score],[label],[vis_ratio]
-    ```
-  - `img1`文件夹里是按照一定帧率抽好的图片。
-  - `seqinfo.ini`文件是视频信息描述文件，需要如下格式的信息：
-    ```
-    [Sequence]
-    name=MOT17-02
-    imDir=img1
-    frameRate=30
-    seqLength=600
-    imWidth=1920
-    imHeight=1080
-    imExt=.jpg
-    ```
+#### images
+- `gt.txt` is the original annotation file of all images extracted from the video.
+- `img1` is the folder of images extracted from the video by a certain frame rate.
+- `seqinfo.ini` is a video information description file, and the following format is required:
+```
+[Sequence]
+name=MOT16-02
+imDir=img1
+frameRate=30
+seqLength=600
+imWidth=1920
+imHeight=1080
+imExt=.jpg
+```
 
-其中`gt.txt`里是当前视频中所有图片的原始标注文件，每行都描述一个边界框，格式如下：
+Each line in `gt.txt`  describes a bounding box, with the format as follows:
 ```
 [frame_id],[identity],[bb_left],[bb_top],[width],[height],[score],[label],[vis_ratio]
 ```
-**注意**:
-  - `frame_id`为当前图片帧序号
-  - `identity`是从`1`到`num_identities`的整数(`num_identities`是**当前视频或图片序列**的不同物体实例的总数)，如果此框没有`identity`标注，则为`-1`。
-  - `bb_left`是目标框的左边界的x坐标
-  - `bb_top`是目标框的上边界的y坐标
-  - `width，height`是真实的像素宽高
-  - `score`是当前目标是否进入考虑范围内的标志(值为0表示此目标在计算中被忽略，而值为1则用于将其标记为活动实例)，默认为`1`
-  - `label`是当前目标的种类标签，由于目前仅支持单类别跟踪，默认为`1`，MOT-16数据集中会有其他类别标签，但都是当作ignore类别计算
-  - `vis_ratio`是当前目标被其他目标包含或覆挡后的可见率，是从0到1的浮点数，默认为`1`
+**Notes:**:
+- `frame_id` is the current frame id.
+- `identity` is an integer from `1` to `num_identities`(`num_identities` is the total number of instances of objects in **this video or image sequence**), or `-1` if this box has no identity annotation.
+- `bb_left` is the x coordinate of the left boundary of the target box
+- `bb_top` is the Y coordinate of the upper boundary of the target box
+- `width, height` are the pixel width and height
+- `score` acts as a flag whether the entry is to be considered. A value of 0 means that this particular instance is ignored in the evaluation, while a value of 1 is used to mark it as active. `1` by default.
+- `label` is the type of object annotated, use `1` as default because only single-class multi-object tracking is supported now. There are other classes of object in MOT-16, but they are treated as ignore.
+- `vis_ratio` is the visibility ratio of each bounding box. This can be due to occlusion by another
+static or moving object, or due to image border cropping. `1` by default.
 
+#### labels_with_ids
+Annotations of these datasets are provided in a unified format. Every image has a corresponding annotation text. Given an image path, the annotation text path can be generated by replacing the string `images` with `labels_with_ids` and replacing `.jpg` with `.txt`.
 
-##### labels_with_ids文件夹
-所有数据集的标注是以统一数据格式提供的。各个数据集中每张图片都有相应的标注文本。给定一个图像路径，可以通过将字符串`images`替换为`labels_with_ids`并将`.jpg`替换为`.txt`来生成标注文本路径。在标注文本中，每行都描述一个边界框，格式如下：
+In the annotation text, each line is describing a bounding box and has the following format:
 ```
 [class] [identity] [x_center] [y_center] [width] [height]
 ```
-**注意**:
-  - `class`为类别id，支持单类别和多类别，从`0`开始计，单类别即为`0`。
-  - `identity`是从`1`到`num_identities`的整数(`num_identities`是数据集中所有视频或图片序列的不同物体实例的总数)，如果此框没有`identity`标注，则为`-1`。
-  - `[x_center] [y_center] [width] [height]`是中心点坐标和宽高，注意是由图片的宽度/高度标准化的，因此它们是从0到1的浮点数。
+**Notes:**
+- `class` is the class id, support single class and multi-class, start from `0`, and for single class is `0`.
+- `identity` is an integer from `1` to `num_identities`(`num_identities` is the total number of instances of objects in the dataset of all videos or image squences), or `-1` if this box has no identity annotation.
+- `[x_center] [y_center] [width] [height]` are the center coordinates, width and height, note that they are normalized by the width/height of the image, so they are floating point numbers ranging from 0 to 1.
 
-可采用如下脚本生成相应的`labels_with_ids`:
+Generate the corresponding `labels_with_ids` with following command:
 ```
 cd dataset/mot
 python gen_labels_MOT.py
 ```
 
 
-### 引用
+### Citation
 Caltech:
 ```
 @inproceedings{ dollarCVPR09peds,

@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 
 # PaddleDetection检测模型在CPU-GPU上的部署方案—FastDeploy
 

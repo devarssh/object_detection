@@ -1,41 +1,40 @@
-简体中文 | [English](DetAnnoTools_en.md)
 
 
 
-# 目标检测标注工具
+# Object Detection Annotation Tools
 
-## 目录
+## Concents
 
 [LabelMe](#LabelMe)
 
-* [使用说明](#使用说明)
-  * [安装](#LabelMe安装)
-  * [图片标注过程](#LabelMe图片标注过程)
-* [标注格式](#LabelMe标注格式)
-  * [导出数据格式](#LabelMe导出数据格式)
-  * [格式转化总结](#格式转化总结)
-  * [标注文件(json)-->VOC](#标注文件(json)-->VOC数据集)
-  * [标注文件(json)-->COCO](#标注文件(json)-->COCO数据集)
+* [Instruction](#Instruction-of-LabelMe)
+  * [Installation](#Installation)
+  * [Annotation of Images](#Annotation-of-images-in-LabelMe)
+* [Annotation Format](#Annotation-Format-of-LabelMe)
+  * [Export Format](#Export-Format-of-LabelMe)
+  * [Summary of Format Conversion](#Summary-of-Format-Conversion)
+  * [Annotation file(json)—>VOC Dataset](#annotation-filejsonvoc-dataset)
+  * [Annotation file(json)—>COCO Dataset](#annotation-filejsoncoco-dataset)
 
 [LabelImg](#LabelImg)
 
-* [使用说明](#使用说明)
-  * [LabelImg安装](#LabelImg安装)
-  * [安装注意事项](#安装注意事项)
-  * [图片标注过程](#LabelImg图片标注过程)
-* [标注格式](#LabelImg标注格式)
-  * [导出数据格式](#LabelImg导出数据格式)
-  * [格式转换注意事项](#格式转换注意事项)
+* [Instruction](#Instruction-of-LabelImg)
+  * [Installation](#Installation-of-LabelImg)
+  * [Installation Notes](#Installation-Notes)
+  * [Annotation of images](#Annotation-of-images-in-LabelImg)
+* [Annotation Format](#Annotation-Format-of-LabelImg)
+  * [Export Format](#Export-Format-of-LabelImg)
+  * [Notes of Format Conversion](#Notes-of-Format-Conversion)
 
 
 
 ## [LabelMe](https://github.com/wkentaro/labelme)
 
-### 使用说明
+### Instruction of LabelMe
 
-#### LabelMe安装
+#### Installation
 
-具体安装操作请参考[LabelMe官方教程](https://github.com/wkentaro/labelme)中的Installation
+Please refer to [The github of LabelMe](https://github.com/wkentaro/labelme) for installation details.
 
 <details>
 <summary><b> Ubuntu</b></summary>
@@ -71,7 +70,7 @@ brew install wkentaro/labelme/labelme  # command line interface
 
 
 
-推荐使用Anaconda的安装方式
+We recommend installing by Anoncanda.
 
 ```
 conda create –name=labelme python=3
@@ -84,56 +83,54 @@ pip install labelme
 
 
 
-#### LabelMe图片标注过程
+#### Annotation of Images in LabelMe
 
-启动labelme后，选择图片文件或者图片所在文件夹
+After starting labelme, select an image or an folder with images.
 
-左侧编辑栏选择`create polygons`  绘制标注区域如下图所示（右击图像区域可以选择不同的标注形状），绘制好区域后按下回车，弹出新的框填入标注区域对应的标签，如：people
+Select  `create polygons`   in the formula bar. Draw an annotation area as shown in the following  GIF. You can right-click on the image to select different shape. When finished, press the Enter/Return key, then fill the corresponding label in the popup box, such as, people.
 
-左侧菜单栏点击保存，生成`json`形式的**标注文件**
+Click the save button in the formula bar，it will generate an annotation file in json.
 
 ![](https://media3.giphy.com/media/XdnHZgge5eynRK3ATK/giphy.gif?cid=790b7611192e4c0ec2b5e6990b6b0f65623154ffda66b122&rid=giphy.gif&ct=g)
 
 
 
-### LabelMe标注格式
+### Annotation Format of LabelMe
 
-#### LabelMe导出数据格式
-
-```
-#生成标注文件
-png/jpeg/jpg-->labelme标注-->json
-```
-
-
-
-
-
-#### 格式转化总结
+#### Export Format of LabelMe
 
 ```
-#标注文件转化为VOC数据集格式
-json-->labelme2voc.py-->VOC数据集
-
-#标注文件转化为COCO数据集格式
-json-->labelme2coco.py-->COCO数据集
+#generate an annotation file
+png/jpeg/jpg-->labelme-->json
 ```
 
 
 
 
 
-#### 标注文件(json)-->VOC数据集
+#### Summary of Format Conversion
 
-使用[官方给出的labelme2voc.py](https://github.com/wkentaro/labelme/blob/main/examples/bbox_detection/labelme2voc.py)这份脚本
+```
+#convert annotation file to VOC dataset format
+json-->labelme2voc.py-->VOC dataset
 
-下载该脚本，在命令行中使用
+#convert annotation file to COCO dataset format
+json-->labelme2coco.py-->COCO dataset
+```
+
+
+
+
+
+#### Annotation file(json)—>VOC Dataset
+
+Use this script [labelme2voc.py](https://github.com/wkentaro/labelme/blob/main/examples/bbox_detection/labelme2voc.py) in command line.
 
 ```Te
-python labelme2voc.py data_annotated(标注文件所在文件夹) data_dataset_voc(输出文件夹) --labels labels.txt
+python labelme2voc.py data_annotated(annotation folder) data_dataset_voc(output folder) --labels labels.txt
 ```
 
-运行后，在指定的输出文件夹中会如下的目录
+Then, it will generate following contents: 
 
 ```
 # It generates:
@@ -147,9 +144,9 @@ python labelme2voc.py data_annotated(标注文件所在文件夹) data_dataset_v
 
 
 
-#### 标注文件(json)-->COCO数据集
+#### Annotation file(json)—>COCO Dataset
 
-使用[PaddleDetection提供的x2coco.py](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/tools/x2coco.py) 将labelme标注的数据转换为COCO数据集形式
+Convert the data annotated by LabelMe to COCO dataset by the script [x2coco.py](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/tools/x2coco.py) provided by PaddleDetection.
 
 ```bash
 python tools/x2coco.py \
@@ -162,13 +159,13 @@ python tools/x2coco.py \
                 --test_proportion 0.0
 ```
 
-用户数据集转成COCO数据后目录结构如下（注意数据集中路径名、文件名尽量不要使用中文，避免中文编码问题导致出错）：
+After the user dataset is converted to COCO data, the directory structure is as follows (Try to avoid use Chinese for the path name in case of errors caused by Chinese coding problems):
 
 ```
 dataset/xxx/
 ├── annotations
-│   ├── train.json  # coco数据的标注文件
-│   ├── valid.json  # coco数据的标注文件
+│   ├── train.json  # Annotation file of coco data
+│   ├── valid.json  # Annotation file of coco data
 ├── images
 │   ├── xxx1.jpg
 │   ├── xxx2.jpg
@@ -183,11 +180,11 @@ dataset/xxx/
 
 ## [LabelImg](https://github.com/tzutalin/labelImg)
 
-### 使用说明
+### Instruction
 
-#### LabelImg安装
+#### Installation of LabelImg
 
-安装操作请参考[LabelImg官方教程](https://github.com/tzutalin/labelImg)
+Please refer to [The github of LabelImg](https://github.com/tzutalin/labelImg) for installation details.
 
 <details>
 <summary><b> Ubuntu</b></summary>
@@ -222,9 +219,9 @@ python3 labelImg.py [IMAGE_PATH] [PRE-DEFINED CLASS FILE]
 
 
 
-推荐使用Anaconda的安装方式
+We recommend installing by Anoncanda.
 
- 首先下载并进入 [labelImg](https://github.com/tzutalin/labelImg#labelimg) 的目录
+Download and go to the folder of  [labelImg](https://github.com/tzutalin/labelImg#labelimg)
 
 ```
 conda install pyqt=5
@@ -238,21 +235,15 @@ python labelImg.py [IMAGE_PATH] [PRE-DEFINED CLASS FILE]
 
 
 
-#### 安装注意事项
+#### Installation Notes
 
-以Anaconda安装方式为例，比Labelme配置要麻烦一些
+Use python scripts to startup LabelImg: `python labelImg.py <IMAGE_PATH>`
 
-启动方式是通过python运行脚本`python labelImg.py <图片路径>`
+#### Annotation of images in LabelImg
 
+After the startup of LabelImg, select an image or a folder with images.
 
-
-#### LabelImg图片标注过程
-
-启动labelImg后，选择图片文件或者图片所在文件夹
-
-左侧编辑栏选择`创建区块`  绘制标注区，在弹出新的框选择对应的标签
-
-左侧菜单栏点击保存，可以选择VOC/YOLO/CreateML三种类型的标注文件
+Select  `Create RectBox`  in the formula bar. Draw an annotation area as shown in the following  GIF. When finished, select corresponding label in the popup box. Then save the annotated file in three forms:  VOC/YOLO/CreateML.
 
 
 
@@ -262,18 +253,18 @@ python labelImg.py [IMAGE_PATH] [PRE-DEFINED CLASS FILE]
 
 
 
-### LabelImg标注格式
+### Annotation Format of LabelImg
 
-#### LabelImg导出数据格式
+#### Export Format of LabelImg
 
 ```
-#生成标注文件
-png/jpeg/jpg-->labelImg标注-->xml/txt/json
+#generate annotation files
+png/jpeg/jpg-->labelImg-->xml/txt/json
 ```
 
 
 
-#### 格式转换注意事项
+#### Notes of Format Conversion
 
-**PaddleDetection支持VOC或COCO格式的数据**，经LabelImg标注导出后的标注文件，需要修改为**VOC或COCO格式**，调整说明可以参考[准备训练数据](./PrepareDataSet.md#%E5%87%86%E5%A4%87%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE)
+**PaddleDetection supports the format of VOC or COCO.** The annotation file generated by LabelImg needs to be converted by VOC or COCO.  You can refer to [PrepareDataSet](./PrepareDataSet.md#%E5%87%86%E5%A4%87%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE).
 

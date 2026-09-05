@@ -1,4 +1,3 @@
-English | [简体中文](DistributedTraining_cn.md)
 
 
 ## 1. Usage

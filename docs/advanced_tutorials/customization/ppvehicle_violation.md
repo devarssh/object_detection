@@ -1,41 +1,44 @@
-简体中文 | [English](./ppvehicle_violation_en.md)
 
-# 车辆违章任务二次开发
+# Customized Vehicle Violation
 
-车辆违章任务的二次开发，主要集中于车道线分割模型任务。采用PP-LiteSeg模型在车道线数据集bdd100k,上进行fine-tune得到，过程参考[PP-LiteSeg](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/configs/pp_liteseg/README.md)。
+The secondary development of vehicle violation task mainly focuses on the task of lane line segmentation model. PP-LiteSeg model is used to get the lane line data set bdd100k through fine-tune. The process is referred to [PP-LiteSeg](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/configs/pp_liteseg/README.md)。
 
-## 数据准备
+## Data preparation
 
-ppvehicle违法分析将车道线类别分为4类
+ppvehicle violation analysis divides the lane line into 4 categories
 ```
-0 背景
-1 双黄线
-2 实线
-3 虚线
+0 Background
 
-```
+1 double yellow line
 
-1. 对于bdd100k数据集，可以结合我们的提供的处理脚本[lane_to_mask.py](../../../deploy/pipeline/tools/lane_to_mask.py)和bdd100k官方[repo](https://github.com/bdd100k/bdd100k)将数据处理成分割需要的数据格式.
+2 Solid line
+
+3 Dashed line
 
 ```
-#首先执行以下命令clone bdd100k库：
+
+1. For the bdd100k data set, we can combine the processing script provided by [lane_to_mask.py](../../../deploy/pipeline/tools/lane_to_mask.py) and bdd100k [repo](https://github.com/bdd100k/bdd100k) to process the data into the data format required for segmentation.
+
+
+```
+# clone bdd100k：
 git clone https://github.com/bdd100k/bdd100k.git
 
-#拷贝lane_to_mask.py到bdd100k目录
+# copy lane_to_mask.py to bdd100k/
 cp PaddleDetection/deploy/pipeline/tools/lane_to_mask.py bdd100k/
 
-#准备bdd100k环境
+# preparation bdd100k env
 cd bdd100k && pip install -r requirements.txt
 
-#数据转换
+#bdd100k to mask
 python lane_to_mask.py -i dataset/labels/lane/polygons/lane_train.json -o /output_path
 
-# -i bdd100k数据集label的json路径，
-# -o 生成的mask图像路径
+# -i means input path for bdd100k dataset label json，
+# -o for output patn
 
 ```
 
-2. 整理数据,按如下格式存放数据
+2. Organize data and store data in the following format:
 ```
 dataset_root
     |
@@ -68,32 +71,35 @@ dataset_root
     |       |--...
     |
 ```
-运行[create_dataset_list.py](../../../deploy/pipeline/tools/create_dataset_list.py)生成txt文件
-```
-python create_dataset_list.py <dataset_root> #数据根目录
-                              --type  custom #数据类型，支持cityscapes、custom
 
+run [create_dataset_list.py](../../../deploy/pipeline/tools/create_dataset_list.py) create txt file
 
 ```
-其他数据以及数据标注，可参考PaddleSeg[准备自定义数据集](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/docs/data/marker/marker_cn.md)
+python create_dataset_list.py <dataset_root> #dataset path
+                              --type  custom #dataset type，support cityscapes、custom
+
+```
+
+For other data and data annotation, please refer to PaddleSeg [Prepare Custom Datasets](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/docs/data/marker/marker_cn.md)
 
 
-## 模型训练
+## model training
 
-首先执行以下命令clone PaddleSeg库代码到训练机器：
+clone PaddleSeg：
 ```
 git clone https://github.com/PaddlePaddle/PaddleSeg.git
 ```
 
-安装相关依赖环境：
+prepapation env：
 ```
 cd PaddleSeg
 pip install -r requirements.txt
 ```
 
-### 准备配置文件
-详细可参考PaddleSeg[准备配置文件](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/docs/config/pre_config_cn.md).
-本例用pp_liteseg_stdc2_bdd100k_1024x512.yml示例
+### Prepare configuration file
+For details, please refer to PaddleSeg [prepare configuration file](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.7/docs/config/pre_config_cn.md).
+
+exp: pp_liteseg_stdc2_bdd100k_1024x512.yml
 
 ```
 batch_size: 16
@@ -101,9 +107,9 @@ iters: 50000
 
 train_dataset:
   type: Dataset
-  dataset_root: data/bdd100k    #数据集路径  
-  train_path: data/bdd100k/train.txt #数据集训练txt文件
-  num_classes: 4                     #ppvehicle将道路分为4类
+  dataset_root: data/bdd100k    #dataset path  
+  train_path: data/bdd100k/train.txt #dataset train txt
+  num_classes: 4                     #lane classes
   mode: train
   transforms:
     - type: ResizeStepScaling
@@ -122,8 +128,8 @@ train_dataset:
 
 val_dataset:
   type: Dataset
-  dataset_root: data/bdd100k    #数据集路径
-  val_path: data/bdd100k/val.txt #数据集验证集txt文件
+  dataset_root: data/bdd100k    #dataset path
+  val_path: data/bdd100k/val.txt #dataset val txt
   num_classes: 4
   mode: val
   transforms:
@@ -164,16 +170,15 @@ model:
   type: PPLiteSeg
   backbone:
     type: STDC2
-    pretrained: https://bj.bcebos.com/paddleseg/dygraph/PP_STDCNet2.tar.gz #预训练模型
+    pretrained: https://bj.bcebos.com/paddleseg/dygraph/PP_STDCNet2.tar.gz #Pre-training model
 ```
 
-### 执行训练
+### training model
 
 ```
-#单卡训练
-export CUDA_VISIBLE_DEVICES=0 # Linux上设置1张可用的卡
-# set CUDA_VISIBLE_DEVICES=0  # Windows上设置1张可用的卡
-
+#Single GPU training
+export CUDA_VISIBLE_DEVICES=0 # Linux
+# set CUDA_VISIBLE_DEVICES=0  # Windows
 python train.py \
        --config configs/pp_liteseg/pp_liteseg_stdc2_bdd100k_1024x512.yml \
        --do_eval \
@@ -182,19 +187,19 @@ python train.py \
        --save_dir output
 
 ```
-### 训练参数解释
+### Explanation of training parameters
 ```
---do_eval 是否在保存模型时启动评估, 启动时将会根据mIoU保存最佳模型至best_model
---use_vdl 是否开启visualdl记录训练数据
---save_interval 500  模型保存的间隔步数
---save_dir output    模型输出路径
+--do_eval    Whether to start the evaluation when saving the model. When starting, the best model will be saved to best according to mIoU model
+--use_vdl Whether to enable visualdl to record training data
+--save_interval 500  Number of steps between model saving
+--save_dir output    Model output path
 ```
 
-## 2、多卡训练
-如果想要使用多卡训练的话，需要将环境变量CUDA_VISIBLE_DEVICES指定为多卡（不指定时默认使用所有的gpu)，并使用paddle.distributed.launch启动训练脚本（windows下由于不支持nccl，无法使用多卡训练）:
+## 2、Multiple GPUs training
+if you want to use multiple gpus training, you need to set the environment variable CUDA_VISIBLE_DEVICES is specified as multiple gpus (if not specified, all gpus will be used by default), and the training script will be started using paddle.distributed.launch (because nccl is not supported under windows, multi-card training cannot be used):
 
 ```
-export CUDA_VISIBLE_DEVICES=0,1,2,3 # 设置4张可用的卡
+export CUDA_VISIBLE_DEVICES=0,1,2,3 # 4 gpus
 python -m paddle.distributed.launch train.py \
        --config configs/pp_liteseg/pp_liteseg_stdc2_bdd100k_1024x512.yml \
        --do_eval \
@@ -204,18 +209,17 @@ python -m paddle.distributed.launch train.py \
 ```
 
 
-训练完成后可以执行以下命令进行性能评估：
+After training, you can execute the following commands for performance evaluation:
 ```
-#单卡评估
 python val.py \
        --config configs/pp_liteseg/pp_liteseg_stdc2_bdd100k_1024x512.yml \
        --model_path output/iter_1000/model.pdparams
 ```
 
 
-### 模型导出
+### Model export
 
-使用下述命令将训练好的模型导出为预测部署模型。
+Use the following command to export the trained model as a prediction deployment model.
 
 ```
 python export.py \
@@ -225,11 +229,11 @@ python export.py \
 ```
 
 
-使用时在PP-Vehicle中的配置文件`./deploy/pipeline/config/infer_cfg_ppvehicle.yml`中修改`LANE_SEG`模块中的`model_dir`项.
+Profile in PP-Vehicle when used `./deploy/pipeline/config/infer_cfg_ppvehicle.yml` set `model_dir` in `LANE_SEG`.
 ```
 LANE_SEG:
   lane_seg_config: deploy/pipeline/config/lane_seg_config.yml  
   model_dir:  output/inference_model
 ```
 
-然后可以使用-->至此即完成更新车道线分割模型任务。
+Then you can use -->to finish the task of updating the lane line segmentation model.

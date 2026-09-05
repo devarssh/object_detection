@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection Ascend Python部署示例
 
 本目录下提供`infer.py`快速完成PPYOLOE在华为昇腾上部署的示例。

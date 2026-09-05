@@ -1,20 +1,19 @@
-[English](pphuman_mtmct_en.md) | 简体中文
 
-# PP-Human跨镜头跟踪模块
+# Multi-Target Multi-Camera Tracking Module of PP-Human
 
-跨镜头跟踪任务，是在单镜头跟踪的基础上，实现不同摄像头中人员的身份匹配关联。在安放、智慧零售等方向有较多的应用。
-PP-Human跨镜头跟踪模块主要目的在于提供一套简洁、高效的跨镜跟踪Pipeline，REID模型完全基于开源数据集训练。
+Multi-target multi-camera tracking, or MTMCT, matches the identity of a person in different cameras based on the single-camera tracking. MTMCT is usually applied to the security system and the smart retailing.
+The MTMCT module of PP-Human aims to provide a multi-target multi-camera pipleline which is simple, and efficient.
 
-## 使用方法
+## How to Use
 
-1. 下载模型 [行人跟踪](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip)和[REID模型](https://bj.bcebos.com/v1/paddledet/models/pipeline/reid_model.zip) 并解压到```./output_inference```路径下，修改配置文件中模型路径。也可简单起见直接用默认配置，自动下载模型。 MOT模型请参考[mot说明](./pphuman_mot.md)文件下载。
+1. Download [REID model](https://bj.bcebos.com/v1/paddledet/models/pipeline/reid_model.zip) and unzip it to ```./output_inference```. For the MOT model, please refer to [mot description](./pphuman_mot.md).
 
-2. 跨镜头跟踪模式下，要求输入的多个视频放在同一目录下，同时开启infer_cfg_pphuman.yml 中的REID选择中的enable=True, 命令如下：
+2. In the MTMCT mode, input videos are required to be put in the same directory. set the REID "enable: True" in the infer_cfg_pphuman.yml. The command line is:
 ```python
 python3 deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml --video_dir=[your_video_file_directory] --device=gpu
 ```
 
-3. 相关配置在`./deploy/pipeline/config/infer_cfg_pphuman.yml`文件中修改：
+3. Configuration can be modified in `./deploy/pipeline/config/infer_cfg_pphuman.yml`.
 
 ```python
 python3 deploy/pipeline/pipeline.py
@@ -23,39 +22,42 @@ python3 deploy/pipeline/pipeline.py
         --device=gpu
 ```
 
-## 方案说明
+## Intorduction to the Solution
 
-跨镜头跟踪模块，主要由跨镜头跟踪Pipeline及REID模型两部分组成。
-1. 跨镜头跟踪Pipeline
+MTMCT module consists of the multi-target multi-camera tracking pipeline and the REID model.
+
+1. Multi-Target Multi-Camera Tracking Pipeline
 
 ```
 
-单镜头跟踪[id+bbox]
+single-camera tracking[id+bbox]
         │
-根据bbox截取原图中目标——│
+capture the target in the original image according to bbox——│
         │            │
-    REID模型      质量评估(遮挡、完整度、亮度等)
+    REID model      quality assessment (covered or not, complete or not, brightness, etc.)
         │            │
     [feature]        [quality]
         │            │
    datacollector—————│
         │
-      特征排序、筛选
+      sort out and filter features
         │
- 多视频各id相似度计算
+ calculate the similarity of IDs in the videos
         │
-  id聚类、重新分配id
+  make the IDs cluster together and rearrange them
 ```
 
-2. 模型方案为[reid-strong-baseline](https://github.com/michuanhaohao/reid-strong-baseline), Backbone为ResNet50, 主要特色为模型结构简单。
-本跨镜跟踪中所用REID模型在上述基础上，整合多个开源数据集并压缩模型特征到128维以提升泛化性能。大幅提升了在实际应用中的泛化效果。
+2. The model solution is [reid-strong-baseline](https://github.com/michuanhaohao/reid-strong-baseline), with ResNet50 as the backbone.
 
-### 其他建议
-- 提供的REID模型基于开源数据集训练得到，建议加入自有数据，训练更加强有力的REID模型，将非常明显提升跨镜跟踪效果。
-- 质量评估部分基于简单逻辑+OpenCV实现，效果有限，如果有条件建议针对性训练质量判断模型。
+Under the above circumstances, the REID model used in MTMCT integrates open-source datasets and compresses model features to 128-dimensional features to optimize the generalization. In this way, the actual generalization result becomes much better.
+
+### Other Suggestions
+
+- The provided REID model is obtained from open-source dataset training. It is recommended to add your own data to get a more powerful REID model, notably improving the MTMCT effect.
+- The quality assessment is based on simple logic +OpenCV, whose effect is limited. If possible, it is advisable to conduct specific training on the quality assessment model.
 
 
-### 示例效果
+### Example
 
 - camera 1:
 <div width="600" align="center">
@@ -68,7 +70,7 @@ python3 deploy/pipeline/pipeline.py
 </div>
 
 
-## 参考文献
+## Reference
 ```
 @InProceedings{Luo_2019_CVPR_Workshops,
 author = {Luo, Hao and Gu, Youzhi and Liao, Xingyu and Lai, Shenqi and Jiang, Wei},

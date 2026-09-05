@@ -1,106 +1,101 @@
-[English](pphuman_attribute_en.md) | 简体中文
 
-# PP-Human属性识别模块
+# Attribute Recognition Modules of PP-Human
 
-行人属性识别在智慧社区，工业巡检，交通监控等方向都具有广泛应用，PP-Human中集成了属性识别模块，属性包含性别、年龄、帽子、眼镜、上衣下衣款式等。我们提供了预训练模型，用户可以直接下载使用。
+Pedestrian attribute recognition has been widely used in the intelligent community, industrial, and transportation monitoring. Many attribute recognition modules have been gathered in PP-Human, including gender, age, hats, eyes, clothing and up to 26 attributes in total. Also, the pre-trained models are offered here and users can download and use them directly.
 
-| 任务                 | 算法 | 精度 | 预测速度(ms) |下载链接                                                                               |
+| Task                 | Algorithm | Precision | Inference Speed(ms) | Download Link                                                                               |
 |:---------------------|:---------:|:------:|:------:| :---------------------------------------------------------------------------------: |
-| 行人检测/跟踪 |  PP-YOLOE | mAP: 56.3 <br> MOTA: 72.0 | 检测: 16.2ms <br> 跟踪：22.3ms |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip) |
-| 行人属性高精度模型    |  PP-HGNet_small  |  mA: 95.4  | 单人 1.54ms | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_small_person_attribute_954_infer.zip) |
-| 行人属性轻量级模型    |  PP-LCNet_x1_0  |  mA: 94.5  | 单人 0.54ms | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPLCNet_x1_0_person_attribute_945_infer.zip) |
-| 行人属性精度与速度均衡模型    |  PP-HGNet_tiny  |  mA: 95.2  | 单人 1.14ms | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_person_attribute_952_infer.zip) |
+| High-Precision Model    |  PP-HGNet_small  |  mA: 95.4  | per person 1.54ms | [Download](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_small_person_attribute_954_infer.tar) |
+| Fast Model    |  PP-LCNet_x1_0  |  mA: 94.5  | per person 0.54ms | [Download](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPLCNet_x1_0_person_attribute_945_infer.tar) |
+| Balanced Model    |  PP-HGNet_tiny  |  mA: 95.2  | per person 1.14ms | [Download](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_person_attribute_952_infer.tar) |
 
+1. The precision of pedestiran attribute analysis is obtained by training and testing on the dataset consist of [PA100k](https://github.com/xh-liu/HydraPlus-Net#pa-100k-dataset)，[RAPv2](http://www.rapdataset.com/rapv2.html)，[PETA](http://mmlab.ie.cuhk.edu.hk/projects/PETA.html) and some business data.
+2. The inference speed is V100, the speed of using TensorRT FP16.
+3. This model of Attribute is based on the result of tracking, please download tracking model in the [Page of Mot](./pphuman_mot_en.md). The High precision and Faster model are both available.
+4. You should place the model unziped in the directory of `PaddleDetection/output_inference/`.
 
-1. 检测/跟踪模型精度为[MOT17](https://motchallenge.net/)，[CrowdHuman](http://www.crowdhuman.org/)，[HIEVE](http://humaninevents.org/)和部分业务数据融合训练测试得到。
-2. 行人属性分析精度为[PA100k](https://github.com/xh-liu/HydraPlus-Net#pa-100k-dataset)，[RAPv2](http://www.rapdataset.com/rapv2.html)，[PETA](http://mmlab.ie.cuhk.edu.hk/projects/PETA.html)和部分业务数据融合训练测试得到
-3. 预测速度为V100 机器上使用TensorRT FP16时的速度, 该处测速速度为模型预测速度
-4. 属性模型应用依赖跟踪模型结果，请在[跟踪模型页面](./pphuman_mot.md)下载跟踪模型，依自身需求选择高精或轻量级下载。
-5. 模型下载后解压放置在PaddleDetection/output_inference/目录下。
+## Instruction
 
-## 使用方法
+1. Download the model from the link in the above table, and unzip it to```./output_inference```, and set the "enable: True" in ATTR of infer_cfg_pphuman.yml
 
-1. 从上表链接中下载模型并解压到```PaddleDetection/output_inference```路径下，并修改配置文件中模型路径，也可默认自动下载模型。设置```deploy/pipeline/config/infer_cfg_pphuman.yml```中`ATTR`的enable: True
-
-`infer_cfg_pphuman.yml`中配置项说明：
+The meaning of configs of `infer_cfg_pphuman.yml`：
 ```
-ATTR:                                                                     #模块名称
-  model_dir: output_inference/PPLCNet_x1_0_person_attribute_945_infer/    #模型路径
-  batch_size: 8                                                           #推理最大batchsize
-  enable: False                                                           #功能是否开启
+ATTR:                                                                     #module name
+  model_dir: output_inference/PPLCNet_x1_0_person_attribute_945_infer/    #model path
+  batch_size: 8                                                           #maxmum batchsize when inference
+  enable: False                                                           #whether to enable this model
 ```
 
-2. 图片输入时，启动命令如下(更多命令参数说明，请参考[快速开始-参数说明](./PPHuman_QUICK_STARTED.md#41-参数说明))。
+2. When inputting the image, run the command as follows (please refer to [QUICK_STARTED-Parameters](./PPHuman_QUICK_STARTED.md#41-参数说明) for more details):
 ```python
-#单张图片
+#single image
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    --image_file=test_image.jpg \
                                                    --device=gpu \
 
-#图片文件夹
+#image directory
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    --image_dir=images/ \
                                                    --device=gpu \
 
 ```
-3. 视频输入时，启动命令如下
+3. When inputting the video, run the command as follows:
 ```python
-#单个视频文件
+#a single video file
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    --video_file=test_video.mp4 \
                                                    --device=gpu \
 
-#视频文件夹
+#directory of videos
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    --video_dir=test_videos/ \
                                                    --device=gpu \
 ```
+4. If you want to change the model path, there are two methods：
 
-4. 若修改模型路径，有以下两种方式：
-
-    - 方法一：```./deploy/pipeline/config/infer_cfg_pphuman.yml```下可以配置不同模型路径，属性识别模型修改ATTR字段下配置
-    - 方法二：命令行中--config后面紧跟着增加`-o ATTR.model_dir`修改模型路径：
+    - The first: In ```./deploy/pipeline/config/infer_cfg_pphuman.yml``` you can configurate different model paths. In attribute recognition models, you can modify the configuration in the field of ATTR.
+    - The second: Add `-o ATTR.model_dir` in the command line following the --config to change the model path：
 ```python
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml
+python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    -o ATTR.model_dir=output_inference/PPLCNet_x1_0_person_attribute_945_infer/\
                                                    --video_file=test_video.mp4 \
                                                    --device=gpu
 ```
 
-测试效果如下：
+The test result is：
 
 <div width="600" align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/205597518-7a602bd5-e643-44a1-a4ca-03c9ffecd918.gif"/>
+  <img src="https://user-images.githubusercontent.com/48054808/159898428-5bda0831-7249-4889-babd-9165f26f664d.gif"/>
 </div>
 
-数据来源及版权归属：天覆科技，感谢提供并开源实际场景数据，仅限学术研究使用
+Data Source and Copyright：Skyinfor Technology. Thanks for the provision of actual scenario data, which are only used for academic research here.
 
-## 方案说明
+## Introduction to the Solution
 
-1. 目标检测/多目标跟踪获取图片/视频输入中的行人检测框，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../configs/ppyoloe/README_cn.md)
-2. 通过行人检测框的坐标在输入图像中截取每个行人
-3. 使用属性识别分析每个行人对应属性，属性类型与PA100k数据集相同，具体属性列表如下：
+1. The PP-YOLOE model is used to handle detection boxs of input images/videos from object detection/ multi-object tracking. For details, please refer to the document [PP-YOLOE](../../../configs/ppyoloe).
+2. Capture every pedestrian in the input images with the help of coordiantes of detection boxes.
+3. Analyze the listed labels of pedestirans through attribute recognition. They are the same as those in the PA100k dataset. The label list is as follows:
 ```
-- 性别：男、女
-- 年龄：小于18、18-60、大于60
-- 朝向：朝前、朝后、侧面
-- 配饰：眼镜、帽子、无
-- 正面持物：是、否
-- 包：双肩包、单肩包、手提包
-- 上衣风格：带条纹、带logo、带格子、拼接风格
-- 下装风格：带条纹、带图案
-- 短袖上衣：是、否
-- 长袖上衣：是、否
-- 长外套：是、否
-- 长裤：是、否
-- 短裤：是、否
-- 短裙&裙子：是、否
-- 穿靴：是、否
+- Gender
+- Age: Less than 18; 18-60; Over 60
+- Orientation: Front; Back; Side
+- Accessories: Glasses; Hat; None
+- HoldObjectsInFront: Yes; No
+- Bag: BackPack; ShoulderBag; HandBag
+- TopStyle: UpperStride; UpperLogo; UpperPlaid; UpperSplice
+- BottomStyle: LowerStripe; LowerPattern
+- ShortSleeve: Yes; No
+- LongSleeve: Yes; No
+- LongCoat: Yes; No
+- Trousers: Yes; No
+- Shorts: Yes; No
+- Skirt&Dress: Yes; No
+- Boots: Yes; No
 ```
 
-4. 属性识别模型方案为[StrongBaseline](https://arxiv.org/pdf/2107.03576.pdf)，模型结构更改为基于PP-HGNet、PP-LCNet的多分类网络结构，引入Weighted BCE loss提升模型效果。
+4. The model adopted in the attribute recognition is [StrongBaseline](https://arxiv.org/pdf/2107.03576.pdf), where the structure is the multi-class network structure based on PP-HGNet、PP-LCNet, and Weighted BCE loss is introduced for effect optimization.
 
-## 参考文献
+## Reference
 ```
 @article{jia2020rethinking,
   title={Rethinking of pedestrian attribute recognition: Realistic datasets with efficient method},

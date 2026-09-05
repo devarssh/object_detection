@@ -1,4 +1,3 @@
-简体中文 | [English](README_en.md)
 
 # Ambiguity-Resistant Semi-Supervised Learning for Dense Object Detection (ARSL)
 

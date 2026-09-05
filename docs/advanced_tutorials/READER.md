@@ -1,77 +1,78 @@
-# 数据处理模块
+# Data Processing Module
 
-## 目录
-- [1.简介](#1.简介)
-- [2.数据集](#2.数据集)
-  - [2.1COCO数据集](#2.1COCO数据集)
-  - [2.2Pascal VOC数据集](#2.2Pascal-VOC数据集)
-  - [2.3自定义数据集](#2.3自定义数据集)
-- [3.数据预处理](#3.数据预处理)
-  - [3.1数据增强算子](#3.1数据增强算子)
-  - [3.2自定义数据增强算子](#3.2自定义数据增强算子)
-- [4.Raeder](#4.Reader)
-- [5.配置及运行](#5.配置及运行)
-  - [5.1配置](#5.1配置)
-  - [5.2运行](#5.2运行)
+## Directory
+- [Data Processing Module](#data-processing-module)
+  - [Directory](#directory)
+    - [1.Introduction](#1introduction)
+    - [2.Dataset](#2dataset)
+      - [2.1COCO Dataset](#21coco-dataset)
+      - [2.2Pascal VOC dataset](#22pascal-voc-dataset)
+      - [2.3Customize Dataset](#23customize-dataset)
+    - [3.Data preprocessing](#3data-preprocessing)
+      - [3.1Data Enhancement Operator](#31data-enhancement-operator)
+      - [3.2Custom data enhancement operator](#32custom-data-enhancement-operator)
+    - [4.Reader](#4reader)
+    - [5.Configuration and Operation](#5configuration-and-operation)
+      - [5.1Configuration](#51configuration)
+      - [5.2run](#52run)
 
-### 1.简介
-PaddleDetection的数据处理模块的所有代码逻辑在`ppdet/data/`中，数据处理模块用于加载数据并将其转换成适用于物体检测模型的训练、评估、推理所需要的格式。
-数据处理模块的主要构成如下架构所示：
+### 1.Introduction
+All code logic for Paddle Detection's data processing module in `ppdet/data/`, the data processing module is used to load data and convert it into a format required for training, evaluation and reasoning of object Detection models. The main components of the data processing module are as follows:
+The main components of the data processing module are as follows:
 ```bash
   ppdet/data/
-  ├── reader.py     # 基于Dataloader封装的Reader模块
-  ├── source  # 数据源管理模块
-  │   ├── dataset.py      # 定义数据源基类，各类数据集继承于此
-  │   ├── coco.py         # COCO数据集解析与格式化数据
-  │   ├── voc.py          # Pascal VOC数据集解析与格式化数据
-  │   ├── widerface.py    # WIDER-FACE数据集解析与格式化数据
-  │   ├── category.py    # 相关数据集的类别信息
-  ├── transform  # 数据预处理模块
-  │   ├── batch_operators.py  # 定义各类基于批量数据的预处理算子
-  │   ├── op_helper.py    # 预处理算子的辅助函数
-  │   ├── operators.py    # 定义各类基于单张图片的预处理算子
-  │   ├── gridmask_utils.py    # GridMask数据增强函数
-  │   ├── autoaugment_utils.py  # AutoAugment辅助函数
-  ├── shm_utils.py     # 用于使用共享内存的辅助函数
+  ├── reader.py     # Reader module based on Dataloader encapsulation
+  ├── source  # Data source management module
+  │   ├── dataset.py      # Defines the data source base class from which various datasets are inherited
+  │   ├── coco.py         # The COCO dataset parses and formats the data
+  │   ├── voc.py          # Pascal VOC datasets parse and format data
+  │   ├── widerface.py    # The WIDER-FACE dataset parses and formats data
+  │   ├── category.py    # Category information for the relevant dataset
+  ├── transform  # Data preprocessing module
+  │   ├── batch_operators.py  # Define all kinds of preprocessing operators based on batch data
+  │   ├── op_helper.py    # The auxiliary function of the preprocessing operator
+  │   ├── operators.py    # Define all kinds of preprocessing operators based on single image
+  │   ├── gridmask_utils.py    # GridMask data enhancement function
+  │   ├── autoaugment_utils.py  # AutoAugment auxiliary function
+  ├── shm_utils.py     # Auxiliary functions for using shared memory
   ```
 
 
-### 2.数据集
-数据集定义在`source`目录下，其中`dataset.py`中定义了数据集的基类`DetDataSet`, 所有的数据集均继承于基类，`DetDataset`基类里定义了如下等方法：
+### 2.Dataset
+The dataset is defined in the `source` directory, where `dataset.py` defines the base class `DetDataSet` of the dataset. All datasets inherit from the base class, and the `DetDataset` base class defines the following methods:
 
-| 方法                        | 输入   | 输出           |  备注                   |
-| :------------------------: | :----: | :------------: | :--------------: |
-| \_\_len\_\_ | 无     | int, 数据集中样本的数量     | 过滤掉了无标注的样本 |
-| \_\_getitem\_\_ | int, 样本的索引idx     |  dict, 索引idx对应的样本roidb  | 得到transform之后的样本roidb |
-| check_or_download_dataset            | 无     | 无  |  检查数据集是否存在，如果不存在则下载，目前支持COCO, VOC，widerface等数据集 |
-| set_kwargs                |  可选参数，以键值对的形式给出   | 无  | 目前用于支持接收mixup, cutmix等参数的设置 |
-| set_transform            | 一系列的transform函数   | 无  | 设置数据集的transform函数 |
-| set_epoch            | int, 当前的epoch  | 无  | 用于dataset与训练过程的交互 |
-| parse_dataset            | 无  | 无  | 用于从数据中读取所有的样本 |
-| get_anno            | 无  | 无  | 用于获取标注文件的路径 |
+|          Method           |                    Input                     |                  Output                   |                                                      Note                                                       |
+| :-----------------------: | :------------------------------------------: | :---------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
+|        \_\_len\_\_        |                      no                      | int, the number of samples in the dataset |                                        Filter out the unlabeled samples                                         |
+|      \_\_getitem\_\_      |         int, The index of the sample         |      dict, Index idx to sample ROIDB      |                                      Get the sample roidb after transform                                       |
+| check_or_download_dataset |                      no                      |                    no                     | Check whether the dataset exists, if not, download, currently support COCO, VOC, Widerface and other datasets |
+|        set_kwargs         | Optional arguments, given as key-value pairs |                    no                     |                     Currently used to support receiving mixup, cutMix and other parameters                      |
+|       set_transform       |       A series of transform functions        |                    no                     |                                    Set the transform function of the dataset                                    |
+|         set_epoch         |              int, current epoch              |                    no                     |                                Interaction between dataset and training process                                 |
+|       parse_dataset       |                      no                      |                    no                     |                                     Used to read all samples from the data                                      |
+|         get_anno          |                      no                      |                    no                     |                                   Used to get the path to the annotation file                                   |
 
-当一个数据集类继承自`DetDataSet`，那么它只需要实现parse_dataset函数即可。parse_dataset根据数据集设置的数据集根路径dataset_dir，图片文件夹image_dir， 标注文件路径anno_path取出所有的样本，并将其保存在一个列表roidbs中，每一个列表中的元素为一个样本xxx_rec(比如coco_rec或者voc_rec)，用dict表示，dict中包含样本的image, gt_bbox, gt_class等字段。COCO和Pascal-VOC数据集中的xxx_rec的数据结构定义如下：
+When a dataset class inherits from `DetDataSet`, it simply implements the Parse dataset function. parse_dataset set dataset root path dataset_dir, image folder image dir, annotated file path anno_path retrieve all samples and save them in a list roidbs Each element in the list is a sample XXX rec(such as coco_rec or voc_rec), represented by dict, which contains the sample image, gt_bbox, gt_class and other fields. The data structure of xxx_rec in COCO and Pascal-VOC datasets is defined as follows:
   ```python
   xxx_rec = {
-      'im_file': im_fname,         # 一张图像的完整路径
-      'im_id': np.array([img_id]), # 一张图像的ID序号
-      'h': im_h,                   # 图像高度
-      'w': im_w,                   # 图像宽度
-      'is_crowd': is_crowd,        # 是否是群落对象, 默认为0 (VOC中无此字段)
-      'gt_class': gt_class,        # 标注框标签名称的ID序号
-      'gt_bbox': gt_bbox,          # 标注框坐标(xmin, ymin, xmax, ymax)
-      'gt_poly': gt_poly,          # 分割掩码，此字段只在coco_rec中出现，默认为None
-      'difficult': difficult       # 是否是困难样本，此字段只在voc_rec中出现，默认为0
+      'im_file': im_fname,         # The full path to an image
+      'im_id': np.array([img_id]), # The ID number of an image
+      'h': im_h,                   # Height of the image
+      'w': im_w,                   # The width of the image
+      'is_crowd': is_crowd,        # Community object, default is 0 (VOC does not have this field)
+      'gt_class': gt_class,        # ID number of an enclosure label name
+      'gt_bbox': gt_bbox,          # label box coordinates(xmin, ymin, xmax, ymax)
+      'gt_poly': gt_poly,          # Segmentation mask. This field only appears in coco_rec and defaults to None
+      'difficult': difficult       # Is it a difficult sample? This field only appears in voc_rec and defaults to 0
   }
   ```
 
-xxx_rec中的内容也可以通过`DetDataSet`的data_fields参数来控制，即可以过滤掉一些不需要的字段，但大多数情况下不需要修改，按照`configs/datasets`中的默认配置即可。
+The contents of the xxx_rec can also be controlled by the Data fields parameter of `DetDataSet`, that is, some unwanted fields can be filtered out, but in most cases you do not need to change them. The default configuration in `configs/datasets` will do.
 
-此外，在parse_dataset函数中，保存了类别名到id的映射的一个字典`cname2cid`。在coco数据集中，会利用[COCO API](https://github.com/cocodataset/cocoapi)从标注文件中加载数据集的类别名，并设置此字典。在voc数据集中，如果设置`use_default_label=False`，将从`label_list.txt`中读取类别列表，反之将使用voc默认的类别列表。
+In addition, a dictionary `cname2cid` holds the mapping of category names to IDS in the Parse dataset function. In coco dataset, can use [coco API](https://github.com/cocodataset/cocoapi) from the label category name of the file to load dataset, and set up the dictionary. In the VOC dataset, if `use_default_label=False` is set, the category list will be read from `label_list.txt`, otherwise the VOC default category list will be used.
 
-#### 2.1COCO数据集
-COCO数据集目前分为COCO2014和COCO2017，主要由json文件和image文件组成，其组织结构如下所示：
-
+#### 2.1COCO Dataset
+COCO datasets are currently divided into COCO2014 and COCO2017, which are mainly composed of JSON files and image files, and their organizational structure is shown as follows:
   ```
   dataset/coco/
   ├── annotations
@@ -89,11 +90,12 @@ COCO数据集目前分为COCO2014和COCO2017，主要由json文件和image文件
   │   ├── 000000000285.jpg
   │   │   ...
   ```
+class `COCODataSet` is defined and registered on `source/coco.py`. And implements the parse the dataset method, called [COCO API](https://github.com/cocodataset/cocoapi) to load and parse COCO format data source ` roidbs ` and ` cname2cid `, See `source/coco.py` source code for details. Converting other datasets to COCO format can be done by referring to [converting User Data to COCO Data](../tutorials/data/PrepareDataSet_en.md#convert-user-data-to-coco-data)
+And implements the parse the dataset method, called [COCO API](https://github.com/cocodataset/cocoapi) to load and parse COCO format data source `roidbs` and `cname2cid`, See `source/coco.py` source code for details. Converting other datasets to COCO format can be done by referring to [converting User Data to COCO Data](../tutorials/data/PrepareDetDataSet_en.md#convert-user-data-to-coco-data)
 
-在`source/coco.py`中定义并注册了`COCODataSet`数据集类，其继承自`DetDataSet`，并实现了parse_dataset方法，调用[COCO API](https://github.com/cocodataset/cocoapi)加载并解析COCO格式数据源`roidbs`和`cname2cid`，具体可参见`source/coco.py`源码。将其他数据集转换成COCO格式可以参考[用户数据转成COCO数据](../tutorials/data/PrepareDetDataSet.md#用户数据转成COCO数据)
 
-#### 2.2Pascal VOC数据集
-该数据集目前分为VOC2007和VOC2012，主要由xml文件和image文件组成，其组织结构如下所示：
+#### 2.2Pascal VOC dataset
+The dataset is currently divided into VOC2007 and VOC2012, mainly composed of XML files and image files, and its organizational structure is shown as follows:
 ```
   dataset/voc/
   ├── trainval.txt
@@ -118,16 +120,17 @@ COCO数据集目前分为COCO2014和COCO2017，主要由json文件和image文件
   │   ├── ImageSets
   │       │   ...
   ```
-在`source/voc.py`中定义并注册了`VOCDataSet`数据集，它继承自`DetDataSet`基类，并重写了`parse_dataset`方法，解析VOC数据集中xml格式标注文件，更新`roidbs`和`cname2cid`。将其他数据集转换成VOC格式可以参考[用户数据转成VOC数据](../tutorials/data/PrepareDetDataSet.md#用户数据转成VOC数据)
+The `VOCDataSet` dataset is defined and registered in `source/voc.py` . It inherits the `DetDataSet` base class and rewrites the `parse_dataset` method to parse XML annotations in the VOC dataset. Update `roidbs` and `cname2cid`. To convert other datasets to VOC format, refer to [User Data to VOC Data](../tutorials/data/PrepareDetDataSet_en.md#convert-user-data-to-voc-data)
 
-#### 2.3自定义数据集
-如果COCODataSet和VOCDataSet不能满足你的需求，可以通过自定义数据集的方式来加载你的数据集。只需要以下两步即可实现自定义数据集
 
-1. 新建`source/xxx.py`，定义类`XXXDataSet`继承自`DetDataSet`基类，完成注册与序列化，并重写`parse_dataset`方法对`roidbs`与`cname2cid`更新：
+#### 2.3Customize Dataset
+If the COCO dataset and VOC dataset do not meet your requirements, you can load your dataset by customizing it. There are only two steps to implement a custom dataset
+
+1. create`source/xxx.py`, define class `XXXDataSet` extends from `DetDataSet` base class, complete registration and serialization, and rewrite `parse_dataset`methods to update `roidbs` and `cname2cid`:
   ```python
   from ppdet.core.workspace import register, serializable
 
-  #注册并序列化
+  #Register and serialize
   @register
   @serializable
   class XXXDataSet(DetDataSet):
@@ -143,75 +146,74 @@ COCO数据集目前分为COCO2014和COCO2017，主要由json文件和image文件
 
       def parse_dataset(self):
           ...
-          省略具体解析数据逻辑
+          Omit concrete parse data logic
           ...
           self.roidbs, self.cname2cid = records, cname2cid
   ```
 
-2. 在`source/__init__.py`中添加引用：
+2. Add a reference to `source/__init__.py`:
   ```python
   from . import xxx
   from .xxx import *
   ```
-完成以上两步就将新的数据源`XXXDataSet`添加好了，你可以参考[配置及运行](#5.配置及运行)实现自定义数据集的使用。
+Complete the above two steps to add the new Data source `XXXDataSet`, you can refer to [Configure and Run](#5.Configuration-and-Operation) to implement the use of custom datasets.
 
-### 3.数据预处理
+### 3.Data preprocessing
 
-#### 3.1数据增强算子
-PaddleDetection中支持了种类丰富的数据增强算子，有单图像数据增强算子与批数据增强算子两种方式，您可选取合适的算子组合使用。单图像数据增强算子定义在`transform/operators.py`中，已支持的单图像数据增强算子详见下表：
+#### 3.1Data Enhancement Operator
+A variety of data enhancement operators are supported in PaddleDetection, including single image data enhancement operator and batch data enhancement operator. You can choose suitable operators to use in combination. Single image data enhancement operators are defined in `transform/operators.py`. The supported single image data enhancement operators are shown in the following table:
+|              Name              |                                                                                                                                 Function                                                                                                                                 |
+| :----------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|             Decode             |                                                                                                     Loads an image from an image file or memory buffer in RGB format                                                                                                     |
+|            Permute             |                                                                                                             If the input is HWC, the sequence changes to CHW                                                                                                             |
+|       RandomErasingImage       |                                                                                                                       Random erasure of the image                                                                                                                        |
+|         NormalizeImage         |                                                                     The pixel value of the image is normalized. If is scale= True is set, the pixel value is divided by 255.0 before normalization.                                                                      |
+|            GridMask            |                                                                                                                        GridMask data is augmented                                                                                                                        |
+|         RandomDistort          |                                                                                                   Random disturbance of image brightness, contrast, saturation and hue                                                                                                   |
+|          AutoAugment           |                                                                                                 Auto Augment data, which contains a series of data augmentation methods                                                                                                  |
+|           RandomFlip           |                                                                                                                   Randomly flip the image horizontally                                                                                                                   |
+|             Resize             |                                                                                                        Resize the image and transform the annotation accordingly                                                                                                         |
+|      MultiscaleTestResize      |                                                                                                          Rescale the image to each size of the multi-scale list                                                                                                          |
+|          RandomResize          |                                                                               Random Resize of images can be resized to different sizes and different interpolation strategies can be used                                                                               |
+|          RandomExpand          |                                                                                 Place the original image into an expanded image filled with pixel mean, crop, scale, and flip the image                                                                                  |
+|        CropWithSampling        | Several candidate frames are generated according to the scaling ratio and length-width ratio, and then the prunning results that meet the requirements are selected according to the area intersection ratio (IoU) between these candidate frames and the marking frames |
+| CropImageWithDataAchorSampling |                                                       Based on Crop Image, in face detection, the Image scale is randomly transformed to a certain range of scale, which greatly enhances the scale change of face                                                       |
+|           RandomCrop           |                                                                                   The principle is the same as CropImage, which is processed with random proportion and IoU threshold                                                                                    |
+|        RandomScaledCrop        |                                                                        According to the long edge, the image is randomly clipped and the corresponding transformation is made to the annotations                                                                         |
+|             Cutmix             |                                                                                                              Cutmix data enhancement, Mosaic of two images                                                                                                               |
+|             Mixup              |                                                                                                              Mixup data enhancement to scale up two images                                                                                                               |
+|          NormalizeBox          |                                                                                                                        Bounding box is normalized                                                                                                                        |
+|             PadBox             |                                                                                        If the number of bounding boxes is less than num Max boxes, zero is populated into bboxes                                                                                         |
+|         BboxXYXY2XYWH          |                                                                                       Bounding Box is converted from (xmin,ymin,xmax,ymin) form to (xmin,ymin, Width,height) form                                                                                        |
+|              Pad               |                                                                          The image Pad is an integer multiple of a certain number or the specified size, and supports the way of specifying Pad                                                                          |
+|           Poly2Mask            |                                                                                                                      Poly2Mask data enhancement ｜                                                                                                                       |
 
-| 名称                     |  作用                   |
-| :---------------------: | :--------------: |
-| Decode             | 从图像文件或内存buffer中加载图像，格式为RGB格式 |
-| Permute                 | 假如输入是HWC顺序变成CHW |
-| RandomErasingImage | 对图像进行随机擦除 |
-| NormalizeImage          | 对图像像素值进行归一化，如果设置is_scale=True，则先将像素值除以255.0, 再进行归一化。 |
-| GridMask  | GridMask数据增广 |
-| RandomDistort           | 随机扰动图片亮度、对比度、饱和度和色相 |
-| AutoAugment | AutoAugment数据增广，包含一系列数据增强方法 |
-| RandomFlip         | 随机水平翻转图像 |
-| Resize             | 对于图像进行resize，并对标注进行相应的变换 |
-| MultiscaleTestResize    | 将图像重新缩放为多尺度list的每个尺寸 |
-| RandomResize | 对于图像进行随机Resize，可以Resize到不同的尺寸以及使用不同的插值策略 |
-| RandomExpand | 将原始图片放入用像素均值填充的扩张图中，对此图进行裁剪、缩放和翻转 |
-| CropWithSampling         | 根据缩放比例、长宽比例生成若干候选框，再依据这些候选框和标注框的面积交并比(IoU)挑选出符合要求的裁剪结果 |
-| CropImageWithDataAchorSampling | 基于CropImage，在人脸检测中，随机将图片尺度变换到一定范围的尺度，大大增强人脸的尺度变化 |
-| RandomCrop              | 原理同CropImage，以随机比例与IoU阈值进行处理 |
-| RandomScaledCrop        | 根据长边对图像进行随机裁剪，并对标注做相应的变换 |
-| Cutmix             | Cutmix数据增强，对两张图片做拼接  |
-| Mixup              | Mixup数据增强，按比例叠加两张图像 |
-| NormalizeBox            | 对bounding box进行归一化 |
-| PadBox                  | 如果bounding box的数量少于num_max_boxes，则将零填充到bbox |
-| BboxXYXY2XYWH           | 将bounding box从(xmin,ymin,xmax,ymin)形式转换为(xmin,ymin,width,height)格式 |
-| Pad           | 将图片Pad某一个数的整数倍或者指定的size，并支持指定Pad的方式 |
-| Poly2Mask | Poly2Mask数据增强 ｜
+Batch data enhancement operators are defined in `transform/batch_operators.py`. The list of operators currently supported is as follows:
+|       Name        |                                                       Function                                                       |
+| :---------------: | :------------------------------------------------------------------------------------------------------------------: |
+|     PadBatch      | Pad operation is performed on each batch of data images randomly to make the images in the batch have the same shape |
+| BatchRandomResize |            Resize a batch of images so that the images in the batch are randomly scaled to the same size             |
+|   Gt2YoloTarget   |                              Generate the objectives of YOLO series models from GT data                              |
+|   Gt2FCOSTarget   |                                  Generate the target of the FCOS model from GT data                                  |
+|   Gt2TTFTarget    |                                     Generate TTF Net model targets from GT data                                      |
+|  Gt2Solov2Target  |                                   Generate targets for SOL Ov2 models from GT data                                   |
 
-批数据增强算子定义在`transform/batch_operators.py`中, 目前支持的算子列表如下：
-| 名称                     |  作用                   |
-| :---------------------: | :--------------: |
-| PadBatch           | 随机对每个batch的数据图片进行Pad操作，使得batch中的图片具有相同的shape |
-| BatchRandomResize  | 对一个batch的图片进行resize，使得batch中的图片随机缩放到相同的尺寸  |
-| Gt2YoloTarget      | 通过gt数据生成YOLO系列模型的目标  |
-| Gt2FCOSTarget      | 通过gt数据生成FCOS模型的目标 |
-| Gt2TTFTarget       | 通过gt数据生成TTFNet模型的目标 |
-| Gt2Solov2Target    | 通过gt数据生成SOLOv2模型的目标 |
-
-**几点说明：**
-- 数据增强算子的输入为sample或者samples，每一个sample对应上文所说的`DetDataSet`输出的roidbs中的一个样本，如coco_rec或者voc_rec
-- 单图像数据增强算子(Mixup, Cutmix等除外)也可用于批数据处理中。但是，单图像处理算子和批图像处理算子仍有一些差异，以RandomResize和BatchRandomResize为例，RandomResize会将一个Batch中的每张图片进行随机缩放，但是每一张图像Resize之后的形状不尽相同，BatchRandomResize则会将一个Batch中的所有图片随机缩放到相同的形状。
-- 除BatchRandomResize外，定义在`transform/batch_operators.py`的批数据增强算子接收的输入图像均为CHW形式，所以使用这些批数据增强算子前请先使用Permute进行处理。如果用到Gt2xxxTarget算子，需要将其放置在靠后的位置。NormalizeBox算子建议放置在Gt2xxxTarget之前。将这些限制条件总结下来，推荐的预处理算子的顺序为
+**A few notes:**
+- The input of Data enhancement operator is sample or samples, and each sample corresponds to a sample of RoIDBS output by `DetDataSet` mentioned above, such as coco_rec or voc_rec
+- Single image data enhancement operators (except Mixup, Cutmix, etc.) can also be used in batch data processing. However, there are still some differences between single image processing operators and Batch image processing operators. Taking Random Resize and Batch Random Resize as an example, Random Resize will randomly scale each picture in a Batch. However, the shapes of each image after Resize are different. Batch Random Resize means that all images in a Batch will be randomly scaled to the same shape.
+- In addition to Batch Random Resize, the Batch data enhancement operators defined in `transform/batch_operators.py` receive input images in the form of CHW, so please use Permute before using these Batch data enhancement operators . If the Gt2xxx Target operator is used, it needs to be placed further back. The Normalize Box operator is recommended to be placed before Gt2xxx Target. After summarizing these constraints, the order of the recommended preprocessing operator is:
   ```
     - XXX: {}
     - ...
-    - BatchRandomResize: {...} # 如果不需要，可以移除，如果需要，放置在Permute之前
-    - Permute: {} # 必须项
-    - NormalizeBox: {} # 如果需要，建议放在Gt2XXXTarget之前
-    - PadBatch: {...} # 如果不需要可移除，如果需要，建议放置在Permute之后
-    - Gt2XXXTarget: {...} # 建议与PadBatch放置在最后的位置
+    - BatchRandomResize: {...} # Remove it if not needed, and place it in front of Permute if necessary
+    - Permute: {} # flush privileges
+    - NormalizeBox: {} # If necessary, it is recommended to precede Gt2XXXTarget
+    - PadBatch: {...} # If not, you can remove it. If necessary, it is recommended to place it behind Permute
+    - Gt2XXXTarget: {...} # It is recommended to place with Pad Batch in the last position
   ```
 
-#### 3.2自定义数据增强算子
-如果需要自定义数据增强算子，那么您需要了解下数据增强算子的相关逻辑。数据增强算子基类为定义在`transform/operators.py`中的`BaseOperator`类，单图像数据增强算子与批数据增强算子均继承自这个基类。完整定义参考源码，以下代码显示了`BaseOperator`类的关键函数: apply和__call__方法
+#### 3.2Custom data enhancement operator
+If you need to customize data enhancement operators, you need to understand the logic of data enhancement operators. The Base class of the data enhancement Operator is the `transform/operators.py`class defined in `BaseOperator`, from which both the single image data enhancement Operator and the batch data enhancement Operator inherit. Refer to the source code for the complete definition. The following code shows the key functions of the `BaseOperator` class: the apply and __call__ methods
   ``` python
   class BaseOperator(object):
 
@@ -228,7 +230,7 @@ PaddleDetection中支持了种类丰富的数据增强算子，有单图像数�
             sample = self.apply(sample, context)
         return sample
   ```
-__call__方法为`BaseOperator`的调用入口，接收一个sample(单图像)或者多个sample(多图像)作为输入，并调用apply函数对一个或者多个sample进行处理。大多数情况下，你只需要继承`BaseOperator`重写apply方法或者重写__call__方法即可，如下所示，定义了一个XXXOp继承自BaseOperator，并注册：
+__call__ method is call entry of `BaseOperator`, Receive one sample(single image) or multiple samples (multiple images) as input, and call the Apply function to process one or more samples. In most cases, you simply inherit from `BaseOperator` and override the apply method or override the __call__ method, as shown below. Define a XXXOp that inherits from Base Operator and register it:
   ```python
   @register_op
   class XXXOp(BaseOperator):
@@ -237,63 +239,61 @@ __call__方法为`BaseOperator`的调用入口，接收一个sample(单图像)�
       super(XXXImage, self).__init__()
       ...
 
-    # 大多数情况下只需要重写apply方法
+    # In most cases, you just need to override the Apply method
     def apply(self, sample, context=None):
       ...
       省略对输入的sample具体操作
       ...
       return sample
 
-    # 如果有需要，可以重写__call__方法，如Mixup, Gt2XXXTarget等
+    # If necessary, override call methods such as Mixup, Gt2XXXTarget, etc
     # def __call__(self, sample, context=None):
     #   ...
-    #   省略对输入的sample具体操作
+    #   The specific operation on the input sample is omitted
     #   ...
     #   return sample
   ```
-大多数情况下，只需要重写apply方法即可，如`transform/operators.py`中除Mixup和Cutmix外的预处理算子。对于批处理的情况一般需要重写__call__方法，如`transform/batch_operators.py`的预处理算子。
+In most cases, you simply override the Apply method, such as the preprocessor in `transform/operators.py` in addition to Mixup and Cutmix. In the case of batch processing, it is generally necessary to override the call method, such as the preprocessing operator of `transform/batch_operators.py`.
 
 ### 4.Reader
-Reader相关的类定义在`reader.py`, 其中定义了`BaseDataLoader`类。`BaseDataLoader`在`paddle.io.DataLoader`的基础上封装了一层，其具备`paddle.io.DataLoader`的所有功能，并能够实现不同模型对于`DetDataset`的不同需求，如可以通过对Reader进行设置，以控制`DetDataset`支持Mixup, Cutmix等操作。除此之外，数据预处理算子通过`Compose`类和`BatchCompose`类组合起来分别传入`DetDataset`和`paddle.io.DataLoader`中。
-所有的Reader类都继承自`BaseDataLoader`类，具体可参见源码。
+The Reader class is defined in `reader.py`, where the `BaseDataLoader` class is defined. `BaseDataLoader` encapsulates a layer on the basis of `paddle.io.DataLoader`, which has all the functions of `paddle.io.DataLoader` and can realize the different needs of `DetDataset` for different models. For example, you can set Reader to control `DetDataset` to support Mixup, Cutmix and other operations. In addition, the Data preprocessing operators are combined into the `DetDataset` and `paddle.io.DataLoader` by the `Compose` and 'Batch Compose' classes, respectively. All Reader classes inherit from the `BaseDataLoader` class. See source code for details.
 
-### 5.配置及运行
+### 5.Configuration and Operation
 
-#### 5.1 配置
-与数据预处理相关的模块的配置文件包含所有模型公用的Dataset的配置文件，以及不同模型专用的Reader的配置文件。
+#### 5.1 Configuration
+The configuration files for modules related to data preprocessing contain the configuration files for Datasets common to all models and the configuration files for readers specific to different models.
 
-##### 5.1.1 Dataset配置
-关于Dataset的配置文件存在于`configs/datasets`文件夹。比如COCO数据集的配置文件如下：
+##### 5.1.1 Dataset Configuration
+The configuration file for the Dataset exists in the `configs/datasets` folder. For example, the COCO dataset configuration file is as follows:
 ```
-metric: COCO # 目前支持COCO, VOC, OID， WiderFace等评估标准
-num_classes: 80 # num_classes数据集的类别数，不包含背景类
+metric: COCO # Currently supports COCO, VOC, OID, Wider Face and other evaluation standards
+num_classes: 80 # num_classes: The number of classes in the dataset, excluding background classes
 
 TrainDataset:
   !COCODataSet
-    image_dir: train2017 # 训练集的图片所在文件相对于dataset_dir的路径
-    anno_path: annotations/instances_train2017.json # 训练集的标注文件相对于dataset_dir的路径
-    dataset_dir: dataset/coco #数据集所在路径，相对于PaddleDetection路径
-    data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd'] # 控制dataset输出的sample所包含的字段，注意此为TrainDataset独有的且必须配置的字段
+    image_dir: train2017 # The path where the training set image resides relative to the dataset_dir
+    anno_path: annotations/instances_train2017.json # Path to the annotation file of the training set relative to the dataset_dir
+    dataset_dir: dataset/coco #The path where the dataset is located relative to the PaddleDetection path
+    data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd'] # Controls the fields contained in the sample output of the dataset, note data_fields are unique to the TrainDataset and must be configured
 
 EvalDataset:
   !COCODataSet
-    image_dir: val2017 # 验证集的图片所在文件夹相对于dataset_dir的路径
-    anno_path: annotations/instances_val2017.json # 验证集的标注文件相对于dataset_dir的路径
-    dataset_dir: dataset/coco # 数据集所在路径，相对于PaddleDetection路径
-
+    image_dir: val2017 # The path where the images of the validation set reside relative to the dataset_dir
+    anno_path: annotations/instances_val2017.json # The path to the annotation file of the validation set relative to the dataset_dir
+    dataset_dir: dataset/coco # The path where the dataset is located relative to the PaddleDetection path
 TestDataset:
   !ImageFolder
-    anno_path: annotations/instances_val2017.json # 标注文件所在路径，仅用于读取数据集的类别信息，支持json和txt格式
-    dataset_dir: dataset/coco # 数据集所在路径，若添加了此行，则`anno_path`路径为`dataset_dir/anno_path`，若此行不设置或去掉此行，则`anno_path`路径即为`anno_path`
+    anno_path: dataset/coco/annotations/instances_val2017.json # The path of the annotation file,  it is only used to read the category information of the dataset. JSON and TXT formats are supported
+    dataset_dir: dataset/coco # The path of the dataset, note if this row is added, `anno_path` will be 'dataset_dir/anno_path`, if not set or removed, `anno_path` is `anno_path`
 ```
-在PaddleDetection的yml配置文件中，使用`!`直接序列化模块实例(可以是函数，实例等)，上述的配置文件均使用Dataset进行了序列化。
+In the YML profile for Paddle Detection, use `!`directly serializes module instances (functions, instances, etc.). The above configuration files are serialized using Dataset.
 
-**注意：**
-请运行前自行仔细检查数据集的配置路径，在训练或验证时如果TrainDataset和EvalDataset的路径配置有误，会提示自动下载数据集。若使用自定义数据集，在推理时如果TestDataset路径配置有误，会提示使用默认COCO数据集的类别信息。
+**Note:**
+Please carefully check the configuration path of the dataset before running. During training or verification, if the path of TrainDataset or EvalDataset is wrong, it will download the dataset automatically. When using a user-defined dataset, if the TestDataset path is incorrectly configured during inference, the category of the default COCO dataset will be used.
 
 
-##### 5.1.2 Reader配置
-不同模型专用的Reader定义在每一个模型的文件夹下，如yolov3的Reader配置文件定义在`configs/yolov3/_base_/yolov3_reader.yml`。一个Reader的示例配置如下：
+##### 5.1.2 Reader configuration
+The Reader configuration files for yolov3 are defined in `configs/yolov3/_base_/yolov3_reader.yml`. An example Reader configuration is as follows:
 ```
 worker_num: 2
 TrainReader:
@@ -321,16 +321,16 @@ TestReader:
     ...
   batch_size: 1
 ```
-你可以在Reader中定义不同的预处理算子，每张卡的batch_size以及DataLoader的worker_num等。
+You can define different preprocessing operators in Reader, batch_size per gpu, worker_num of Data Loader, etc.
 
-#### 5.2运行
-在PaddleDetection的训练、评估和测试运行程序中，都通过创建Reader迭代器。Reader在`ppdet/engine/trainer.py`中创建。下面的代码展示了如何创建训练时的Reader
+#### 5.2run
+In the Paddle Detection training, evaluation, and test runs, Reader iterators are created. The Reader is created in `ppdet/engine/trainer.py`. The following code shows how to create a training-time Reader
 ``` python
 from ppdet.core.workspace import create
 # build data loader
 self.dataset = cfg['TrainDataset']
 self.loader = create('TrainReader')(selfdataset, cfg.worker_num)
 ```
-相应的预测以及评估时的Reader与之类似，具体可参考`ppdet/engine/trainer.py`源码。
+The Reader for prediction and evaluation is similar to `ppdet/engine/trainer.py`.
 
-> 关于数据处理模块，如您有其他问题或建议，请给我们提issue，我们非常欢迎您的反馈。
+> About the data processing module, if you have other questions or suggestions, please send us an issue, we welcome your feedback.

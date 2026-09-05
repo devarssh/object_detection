@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection RKNPU2 C++部署示例
 
 本目录下用于展示PaddleDetection系列模型在RKNPU2上的部署，以下的部署过程以PPYOLOE为例子。

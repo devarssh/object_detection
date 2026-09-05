@@ -1,4 +1,3 @@
-English | [简体中文](README_cn.md)
 
 # JDE (Towards Real-Time Multi-Object Tracking)
 

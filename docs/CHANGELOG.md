@@ -1,405 +1,414 @@
-简体中文 | [English](./CHANGELOG_en.md)
 
-# 版本更新信息
+# Version Update Information
 
-## 最新版本信息
+## Last Version Information
 
 ### 2.6(02.15/2023)
 
-- 特色模型
-  - 发布旋转框检测模型PP-YOLOE-R：Anchor-free旋转框检测SOTA模型，精度速度双高、云边一体，s/m/l/x四个模型适配不用算力硬件、部署友好，避免使用特殊算子，能够轻松使用TensorRT加速；
-  - 发布小目标检测模型PP-YOLOE-SOD：基于切图的端到端检测方案、基于原图的检测模型，精度达VisDrone开源最优；
-  - 发布密集检测模型：基于PP-YOLOE+的密集检测算法，SKU数据集检测精度60.3，达到开源最优
-- 前沿算法
-  - YOLO家族新增前沿算法YOLOv8，更新YOLOv6-v3.0
-  - 新增目标检测算法DINO，YOLOF
-  - 新增ViTDet系列检测模型，PP-YOLOE+ViT_base, Mask RCNN + ViT_base, Mask RCNN + ViT_large
-  - 新增多目标跟踪算法CenterTrack
-  - 新增旋转框检测算法FCOSR
-  - 新增实例分割算法QueryInst
-  - 新增3D关键点检测算法Metro3d
-  - 新增模型蒸馏算法FGD，LD，CWD，新增PP-YOLOE+模型蒸馏，精度提升1.1 mAP
-  - 新增半监督检测算法 DenseTeacher，并适配PP-YOLOE+
-  - 新增少样本迁移学习方案，包含Co-tuning，Contrastive learning两类算法
-- 场景能力
-  - PP-Human v2开源边缘端实时检测模型，精度45.7，Jetson AGX速度80FPS
-  - PP-Vehicle开源边缘端实时检测模型，精度53.5，Jetson AGX速度80FPS
-  - PP-Human v2，PP-Vehicle支持多路视频流部署能力，实现Jetson AGX 4路视频流端到端20FPS实时部署
-  - PP-Vehicle新增车辆压线检测和车辆逆行检测能力
-- 框架能力
-  - 功能新增
-    - 新增检测热力图可视化能力，适配FasterRCNN/MaskRCNN系列, PP-YOLOE系列, BlazeFace, SSD, RetinaNet
-  - 功能完善/Bug修复
-    - 支持python3.10版本
-    - EMA支持过滤不更新参数
-    - 简化PP-YOLOE architecture架构代码
-    - AdamW适配paddle2.4.1版本
+- Featured model
 
+  - Release rotated object detector PP-YOLOE-R：SOTA Anchor-free rotated object detection model with high accuracy and efficiency. It has a series of models, named s/m/l/x, for cloud and edge devices and avoids using special operators to be deployed friendly with TensorRT.
+    - Release small object detector PP-YOLOE-SOD: End-to-end detection pipeline based on sliced images and SOTA model on VisDrone based on original images.
+    - Release crowded object detector: Crowded object detection model with top accuracy on SKU dataset.
+
+- Functions in different scenarios
+
+  - Release real-time object detection model on edge device in PP-Human v2. The model reaches 45.7mAP and 80FPS on Jetson AGX
+  - Release real-time object detection model on edge device in PP-Vehicle. The model reaches 53.5mAP and 80FPS on Jetson AGX
+  - Support multi-stream deployment in PP-Human v2 and PP-Vehicle. Achieved 20FPS in 4-stream deployment on Jetson AGX
+  - Support retrograde and press line detection in PP-Vehicle
+
+- Cutting-edge algorithms
+
+  - Release YOLOv8 and YOLOv6 3.0 in YOLO Family
+  - Release object detection algorithm DINO, YOLOF
+  - Rich ViTDet series including PP-YOLOE+ViT_base, Mask RCNN + ViT_base, Mask RCNN + ViT_large
+  - Release MOT algorithm CenterTrack
+  - Release oriented object detection algorithm FCOSR
+  - Release instance segmentation algorithm QueryInst
+  - Release 3D keypoint detection algorithm Metro3d
+  - Release distillation algorithm FGD，LD，CWD and PP-YOLOE+ distillation with improvement of 1.1+ mAP
+  - Release SSOD algorithm DenseTeacher and adapt for PP-YOLOE+
+  - Release few shot finetuning algorithm, including Co-tuning and Contrastive learning
+
+- Framework capabilities
+
+  - New functions
+    - Release Grad-CAM for heatmap visualization. Support Faster RCNN, Mask RCNN, PP-YOLOE, BlazeFace, SSD, RetinaNet.
+  - Improvement and fixes
+    - Support python 3.10
+    - Fix EMA for no-grad parameters
+    - Simplify PP-YOLOE architecture
+    - Support AdamW for Paddle 2.4.1
 
 ### 2.5(08.26/2022)
 
-- 特色模型
+- Featured model
+
   - PP-YOLOE+：
-    - 发布PP-YOLOE+模型，COCO test2017数据集精度提升0.7%-2.4% mAP，模型训练收敛速度提升3.75倍，端到端预测速度提升1.73-2.3倍
-    - 发布智慧农业，夜间安防检测，工业质检场景预训练模型，精度提升1.3%-8.1% mAP
-    - 支持分布式训练、在线量化、serving部署等10大高性能训练部署能力，新增C++/Python Serving、TRT原生推理、ONNX Runtime等5+部署demo教程
+    - Released PP-YOLOE+ model, with a 0.7%-2.4% mAP improvement on COCO test2017. 3.75 times faster model training convergence rate and 1.73-2.3 times faster end-to-end inference speed
+    - Released pre-trained models for smart agriculture, night security detection, and industrial quality inspection with 1.3%-8.1% mAP accuracy improvement
+    - supports 10 high-performance training deployment capabilities, including distributed training, online quantization, and serving deployment. We also provide more than five new deployment demos, such as C++/Python Serving, TRT native inference, and ONNX Runtime
   - PP-PicoDet：
-    - 发布PicoDet-NPU模型，支持模型全量化部署
-    - 新增PicoDet版面分析模型，基于FGD蒸馏算法精度提升0.5% mAP
+    - Release the PicoDet-NPU model to support full quantization of model deployment
+    - Add PicoDet layout analysis model with 0.5% mAP accuracy improvement due to FGD distillation algorithm
   - PP-TinyPose
-    - 发布PP-TinyPose增强版，在健身、舞蹈等场景的业务数据集端到端AP提升9.1% AP
-    - 覆盖侧身、卧躺、跳跃、高抬腿等非常规动作
-    - 新增滤波稳定模块，关键点稳定性显著增强
+    - Release PP-TinyPose Plus with 9.1% end-to-end AP improvement for business data sets such as physical exercises, dance, and other scenarios
+    - Covers unconventional movements such as turning to one side, lying down, jumping, high lift
+    - Add stabilization module (via filter) to significantly improve the stability at key points
 
-- 场景能力
+- Functions in different scenarios
+
   - PP-Human v2
-    - 发布PP-Human v2，支持四大产业特色功能：多方案行为识别案例库、人体属性识别、人流检测与轨迹留存以及高精度跨镜跟踪
-    - 底层算法能力升级，行人检测精度提升1.5% mAP；行人跟踪精度提升10.2% MOTA，轻量级模型速度提升34%；属性识别精度提升0.6% ma，轻量级模型速度提升62.5%
-    - 提供全流程教程，覆盖数据采集标注，模型训练优化和预测部署，及pipeline中后处理代码修改
-    - 新增在线视频流输入支持
-    - 易用性提升，一行代码执行功能，执行流程判断、模型下载背后自动完成。
+    - Release PP-Human v2, which supports four industrial features: behavioral recognition case zoo for multiple solutions, human attribute recognition, human traffic detection and trajectory retention, as well as high precision multi-camera tracking
+    - Upgraded  underlying algorithm capabilities: 1.5% mAP improvement in pedestrian detection accuracy; 10.2% MOTA improvement in pedestrian tracking accuracy, 34% speed improvement in the lightweight model; 0.6% ma improvement in attribute recognition accuracy, 62.5% speed improvement in the lightweight model
+    - Provides comprehensive tutorials covering data collection and annotation, model training optimization and prediction deployment, and post-processing code modification in the pipeline
+    - Supports online video streaming input
+    - Become more user-friendly with a one-line code execution function that automates the process determination and model download
   - PP-Vehicle
-    - 全新发布PP-Vehicle，支持四大交通场景核心功能：车牌识别、属性识别、车流量统计、违章检测
-    - 车牌识别支持基于PP-OCR v3的轻量级车牌识别模型
-    - 车辆属性识别支持基于PP-LCNet多标签分类模型
-    - 兼容图片、视频、在线视频流等各类数据输入格式
-    - 易用性提升，一行代码执行功能，执行流程判断、模型下载背后自动完成。
+    - Launch PP-Vehicle, which supports four core functions for traffic application: license plate recognition, attribute recognition, traffic flow statistics, and violation detection
+    - License plate recognition supports a lightweight model based on PP-OCR v3
+    - Vehicle attribute recognition supports a multi-label classification model based on PP-LCNet
+    - Compatible with various data input formats such as pictures, videos and online video streaming
+    - Become more user-friendly with a one-line code execution function that automates the process determination and model download
 
-- 前沿算法
-  - YOLO家族全系列模型
-    - 发布YOLO家族全系列模型，覆盖前沿检测算法YOLOv5、YOLOv6及YOLOv7
-    - 基于ConvNext骨干网络，YOLO各算法训练周期缩5-8倍，精度普遍提升1%-5% mAP；使用模型压缩策略实现精度无损的同时速度提升30%以上
-  - 新增基于ViT骨干网络高精度检测模型，COCO数据集精度达到55.7% mAP
-  - 新增OC-SORT多目标跟踪模型
-  - 新增ConvNeXt骨干网络
+- Cutting-edge algorithms
 
-- 产业实践范例教程
-  - 基于PP-TinyPose增强版的智能健身动作识别
-  - 基于PP-Human的打架识别
-  - 基于PP-Human的营业厅来客分析
-  - 基于PP-Vehicle的车辆结构化分析
-  - 基于PP-YOLOE+的PCB电路板缺陷检测
+  - YOLO Family
+    - Release the full range of YOLO family models covering the cutting-edge detection algorithms YOLOv5, YOLOv6 and YOLOv7
+    - Based on the ConvNext backbone network, YOLO's algorithm training periods are reduced by 5-8 times with accuracy generally improving by 1%-5% mAP; Thanks to the model compression strategy, its speed increased by over 30% with no loss of precision.
+  - Newly add high precision detection model based on [ViT](configs/vitdet) backbone network, with a 55.7% mAP accuracy on the COCO dataset
+  - Newly add multi-object tracking model [OC-SORT](configs/mot/ocsort)
+  - Newly add [ConvNeXt](configs/convnext) backbone network.
 
-- 框架能力
-  - 功能新增
-    - 新增自动压缩工具支持并提供demo，PP-YOLOE l版本精度损失0.3% mAP，V100速度提升13%
-    - 新增PaddleServing python/C++和ONNXRuntime部署demo
-    - 新增PP-YOLOE 端到端TensorRT部署demo
-    - 新增FGC蒸馏算法，RetinaNet精度提升3.3%
-    - 新增分布式训练文档
-  - 功能完善/Bug修复
-    - 修复Windows c++部署编译问题
-    - 修复VOC格式数据预测时保存结果问题
-    - 修复FairMOT c++部署检测框输出
-    - 旋转框检测模型S2ANet支持batch size>1部署
+- Industrial application
+
+  - Intelligent physical exercise recognition based on PP-TinyPose Plus
+  - Fighting recognition based on PP-Human
+  - Business hall visitor analysis based on PP-Human
+  - Vehicle structuring analysis based on PP-Vehicle
+  - PCB board defect detection based on PP-YOLOE+
+
+- Framework capabilities
+
+  - New functions
+    - Release auto-compression tools and demos, 0.3% mAP accuracy loss for PP-YOLOE l version, while 13% speed increase for V100
+    - Release PaddleServing python/C++ and ONNXRuntime deployment demos
+    - Release PP-YOLOE end-to-end TensorRT deployment demo
+    - Release FGC distillation algorithm with RetinaNet accuracy improved by 3.3%
+    - Release distributed training documentation
+  - Improvement and fixes
+    - Fix compilation problem with Windows c++ deployment
+    - Fix problems when saving results of inference data in VOC format
+    - Fix the detection box output of FairMOT c++ deployment
+    - Rotating frame detection model S2ANet supports batch size>1 deployment
 
 ### 2.4(03.24/2022)
 
 - PP-YOLOE：
-  - 发布PP-YOLOE特色模型，l版本COCO test2017数据集精度51.6%，V100预测速度78.1 FPS，精度速度服务器端SOTA
-  - 发布s/m/l/x系列模型，打通TensorRT、ONNX部署能力
-  - 支持混合精度训练，训练较PP-YOLOv2加速33%
+  - Release PP-YOLOE object detection models, achieve mAP as 51.6% on COCO test dataset and 78.1 FPS on Nvidia V100 by PP-YOLOE-l, reach SOTA performance for object detection on GPU``
+  - Release series models: s/m/l/x, and support deployment base on TensorRT & ONNX
+  - Spport AMP training and training speed is 33% faster than PP-YOLOv2
 
 - PP-PicoDet:
-  - 发布PP-PicoDet优化模型，精度提升2%左右，CPU预测速度提升63%。
-  - 新增参数量0.7M的PicoDet-XS模型
-  - 后处理集成到网络中，优化端到端部署成本
+  - Release enhanced models of PP-PicoDet, mAP promoted ~2% on COCO and inference speed accelerated 63% on CPU
+  - Release PP-PicoDet-XS model with 0.7M parameters
+  - Post-processing integrated into the network to optimize deployment pipeline
 
-- 行人分析Pipeline：
-  - 发布PP-Human行人分析Pipeline，覆盖行人检测、属性识别、行人跟踪、跨镜跟踪、人流量统计、动作识别多种功能，打通TensorRT部署
-  - 属性识别支持StrongBaseline模型
-  - ReID支持Centroid模型
-  - 动作识别支持ST-GCN摔倒检测
+- PP-Human：
+  - Release PP-Human human analysis pipeline，including pedestrian detection, attribute recognition, human tracking, multi-camera tracking, human statistics, action recognition. Supporting deployment with TensorRT
+  - Release StrongBaseline model for attribute recognition
+  - Release Centroid model for ReID
+  - Release ST-GCN model for falldown action recognition
 
-- 模型丰富度:
-  - 发布YOLOX，支持nano/tiny/s/m/l/x版本，x版本COCO val2017数据集精度51.8%
+- Model richness:
+  - Publish YOLOX object detection model, release series models: nano/tiny/s/m/l/x, and YOLOX-x achieves mAP as 51.8% on COCO val2017 dataset
 
-- 框架功能优化：
-  - EMA训练速度优化20%，优化EMA训练模型保存方式
-  - 支持infer预测结果保存为COCO格式
+- Function Optimize：
+  - Optimize 20% training speed when training with EMA, improve saving method of EMA weights
+  - Support saving inference results in COCO format
 
-- 部署优化：
-  - RCNN全系列模型支持Paddle2ONNX导出ONNX模型
-  - SSD模型支持导出时融合解码OP，优化边缘端部署速度
-  - 支持NMS导出TensorRT，TensorRT部署端到端速度提升
+- Deployment Optimize：
+  - Support export ONNX model by Paddle2ONNX for all RCNN models
+  - Supoort export model with fused decode OP for SSD models to enhance inference speed in edge side
+  - Support export NMS to TensorRT model, optmize inference speed on TensorRT
 
 ### 2.3(11.03/2021)
 
-- 特色模型:
-  - 检测: 轻量级移动端检测模型PP-PicoDet，精度速度达到移动端SOTA
-  - 关键点: 轻量级移动端关键点模型PP-TinyPose
+- Feature models:
+    - Object detection: The lightweight object detection model PP-PicoDet, performace and inference speed reaches SOTA on mobile side
+    - Keypoint detection: The lightweight keypoint detection model PP-TinyPose for mobile side
 
-- 模型丰富度:
-  - 检测：
-    - 新增Swin-Transformer目标检测模型
-    - 新增TOOD(Task-aligned One-stage Object Detection)模型
-    - 新增GFL(Generalized Focal Loss)目标检测模型
-    - 发布Sniper小目标检测优化方法，支持Faster RCNN及PP-YOLO系列模型
-    - 发布针对EdgeBoard优化的PP-YOLO-EB模型
+- Model richness:
+    - Object detection:
+        - Publish Swin-Transformer object detection model
+        - Publish TOOD(Task-aligned One-stage Object Detection) model
+        - Publish GFL(Generalized Focal Loss) object detection model
+        - Publish Sniper optimization method for tiny object detection, supporting Faster RCNN and PP-YOLO series models
+        - Publish PP-YOLO optimized model PP-YOLO-EB for EdgeBoard
+    - Multi-object tracking:
+        - Publish Real-time tracking system PP-Tracking
+        - Publish high-precision, small-scale and lightweight model based on FairMot
+        - Publish real-time tracking model zoo for pedestrian, head and vehicle tracking, including scenarios such as aerial surveillance, autonomous driving, dense crowds, and tiny object tracking
+        - DeepSort support PP-YOLO, PP-PicoDet as object detector
+    - Keypoint detection:
+        - Publish Lite HRNet model
 
-  - 跟踪
-    - 发布实时跟踪系统PP-Tracking
-    - 发布FairMot高精度模型、小尺度模型和轻量级模型
-    - 发布行人、人头和车辆实跟踪垂类模型库，覆盖航拍监控、自动驾驶、密集人群、极小目标等场景
-    - DeepSORT模型适配PP-YOLO, PP-PicoDet等更多检测器
+- Inference deployment:
+    - Support NPU deployment for YOLOv3 series
+    - Support C++ deployment for FairMot
+    - Support C++ and PaddleLite deployment for keypoint detection series model
 
-  - 关键点
-    - 新增Lite HRNet模型
+- Documents:
+    - Add series English documents
 
-- 预测部署:
-  - YOLOv3系列模型支持NPU预测部署
-  - FairMot模型C++预测部署打通
-  - 关键点系列模型C++预测部署打通, Paddle Lite预测部署打通
-
-- 文档:
-  - 新增各系列模型英文文档
 
 ### 2.2(08.10/2021)
 
-- 模型丰富度：
-    - 发布Transformer检测模型：DETR、Deformable DETR、Sparse RCNN
-    - 关键点检测新增Dark模型，发布Dark HRNet模型
-    - 发布MPII数据集HRNet关键点检测模型
-    - 发布人头、车辆跟踪垂类模型
+- Model richness:
+    - Publish the Transformer test model: DETR, Deformable DETR, Sparse RCNN
+    - Key point test new Dark model, release Dark HRNet model
+    - Publish the MPII dataset HRNet keypoint detection model
+    - Release head and vehicle tracking vertical model
 
-- 模型优化：
-    - 旋转框检测模型S2ANet发布Align Conv优化模型，DOTA数据集mAP优化至74.0
+- Model optimization:
+    - AlignConv optimization model was released by S2ANet, and DOTA dataset mAP was optimized to 74.0
 
-- 预测部署
-    - 主流模型支持batch size>1预测部署，包含YOLOv3，PP-YOLO，Faster RCNN，SSD，TTFNet，FCOS
-    - 新增多目标跟踪模型(JDE, FairMot, DeepSort) Python端预测部署支持，并支持TensorRT预测
-    - 新增多目标跟踪模型FairMot联合关键点检测模型部署Python端预测部署支持
-    - 新增关键点检测模型联合PP-YOLO预测部署支持
+- Inference deployment
+    - Mainstream models support batch size>1 predictive deployment, including YOLOv3, PP-YOLO, Faster RCNN, SSD, TTFNet,  FCOS
+    - New addition of target tracking models (JDE, Fair Mot, Deep Sort) Python side prediction deployment support, and support for TensorRT prediction
+    - FairMot joint key point detection model deployment Python side predictive deployment support
+    - Added support for key point detection model combined with PP-YOLO prediction deployment
 
-- 文档：
-    - Windows预测部署文档新增TensorRT版本说明
-    - FAQ文档更新发布
+- Documents:
+    - New TensorRT version notes to Windows Predictive Deployment documentation
+    - FAQ documents are updated
 
-- 问题修复：
-    - 修复PP-YOLO系列模型训练收敛性问题
-    - 修复batch size>1时无标签数据训练问题
+- Bug fixes:
+    - Fixed PP-YOLO series model training convergence problem
+    - Fixed the problem of no label data training when batch_size > 1
 
 
 ### 2.1(05.20/2021)
-- 模型丰富度提升：
-    - 发布关键点模型HRNet，HigherHRNet
-    - 发布多目标跟踪模型DeepSort, FairMot, JDE
+- Model richness enhancement:
+    - Key point model: HRNet, HigherHRNet
+    - Publish the multi-target tracking model: DeepSort, FairMot, JDE
 
-- 框架基础能力：
-    - 支持无标注框训练
+- Basic framework Capabilities:
+    - Supports training without labels
 
-- 预测部署：
-    - Paddle Inference YOLOv3系列模型支持batch size>1预测
-    - 旋转框检测S2ANet模型预测部署打通
-    - 增加量化模型Benchmark
-    - 增加动态图模型与静态图模型Paddle-Lite demo
+- Forecast deployment:
+    - Paddle Inference YOLOv3 series model support batch_size>1 prediction
+    - Rotating frame detection S2ANet model prediction deployment is open
+    - Incremental quantization model benchmark
+    - Add dynamic graph model and static graph model: Paddle-Lite demo
 
-- 检测模型压缩：
-    - 发布PPYOLO系列模型压缩模型
+- Detection model compression:
+    - Release PP-YOLO series model compression model
 
-- 文档：
-    - 更新快速开始，预测部署等教程文档
-    - 新增ONNX模型导出教程
-    - 新增移动端部署文档
+- Documents:
+    - Update quick start, forecast deployment and other tutorial documentation
+    - Added ONNX model export tutorial
+    - Added the mobile deployment document
 
 
 ### 2.0(04.15/2021)
 
-  **说明：** 自2.0版本开始，动态图作为PaddleDetection默认版本，原`dygraph`目录切换为根目录，原静态图实现移动到`static`目录下。
+  **Description:** Since version 2.0, dynamic graphs are used as the default version of Paddle Detection, the original `dygraph` directory is switched to the root directory, and the original static graph implementation is moved to the `static` directory.
 
-  - 动态图模型丰富度提升：
-    - 发布PP-YOLOv2及PP-YOLO tiny模型，PP-YOLOv2 COCO test数据集精度达到49.5%，V100预测速度达到68.9 FPS
-    - 发布旋转框检测模型S2ANet
-    - 发布两阶段实用模型PSS-Det
-    - 发布人脸检测模型Blazeface
+  - Enhancement of dynamic graph model richness:
+    - PP-YOLOv2 and PP-YOLO tiny models were published. The accuracy of PP-YOLOv2 COCO Test dataset reached 49.5%, and the prediction speed of V100 reached 68.9 FPS
+    - Release the rotary frame detection model S2ANet
+    - Release the two-phase utility model PSS-Det
+    - Publish the face detection model Blazeface
 
-  - 新增基础模块：
-    - 新增SENet，GhostNet，Res2Net骨干网络
-    - 新增VisualDL训练可视化支持
-    - 新增单类别精度计算及PR曲线绘制功能
-    - YOLO系列模型支持NHWC数据格式
+  - New basic module:
+    - Added SENet, GhostNet, and Res2Net backbone networks
+    - Added VisualDL training visualization support
+    - Added single precision calculation and PR curve drawing function
+    - The YOLO models support THE NHWC data format
 
-  - 预测部署：
-    - 发布主要模型的预测benchmark数据
-    - 适配TensorRT6，支持TensorRT动态尺寸输入，支持TensorRT int8量化预测
-    - PP-YOLO, YOLOv3, SSD, TTFNet, FCOS, Faster RCNN等7类模型在Linux、Windows、NV Jetson平台下python/cpp/TRT预测部署打通:
+  - Forecast deployment:
+    - Publish forecast benchmark data for major models
+    - Adaptive to TensorRT6, support TensorRT dynamic size input, support TensorRT int8 quantitative prediction
+    - 7 types of models including PP-YOLO, YOLOv3, SSD, TTFNet, FCOS, Faster RCNN are deployed in Python/CPP/TRT prediction on Linux, Windows and NV Jetson platforms
 
-  - 检测模型压缩：
-    - 蒸馏：新增动态图蒸馏支持，并发布YOLOv3-MobileNetV1蒸馏模型
-    - 联合策略：新增动态图剪裁+蒸馏联合策略压缩方案，并发布YOLOv3-MobileNetV1的剪裁+蒸馏压缩模型
-    - 问题修复：修复动态图量化模型导出问题
+  - Detection model compression:
+    - Distillation: Added dynamic map distillation support and released YOLOv3-MobileNetV1 distillation model
+    - Joint strategy: new dynamic graph prunning + distillation joint strategy compression scheme, and release YOLOv3-MobileNetV1 prunning + distillation compression model
+    - Problem fix: Fixed dynamic graph quantization model export problem
 
-  - 文档：
-    - 新增动态图英文文档：包含首页文档，入门使用，快速开始，模型算法、新增数据集等
-    - 新增动态图中英文安装文档
-    - 新增动态图RCNN系列和YOLO系列配置文件模板及配置项说明文档
+  - Documents:
+    - New English document of dynamic graph: including homepage document, getting started, quick start, model algorithm, new dataset, etc
+    - Added both English and Chinese installation documents of dynamic diagrams
+    - Added configuration file templates and description documents of dynamic graph RCNN series and YOLO series
 
 
-## 历史版本信息
+## Historical Version Information
 
 ### 2.0-rc(02.23/2021)
-  - 动态图模型丰富度提升：
-    - 优化RCNN模型组网及训练方式，RCNN系列模型精度提升(依赖Paddle develop或2.0.1版本)
-    - 新增支持SSDLite，FCOS，TTFNet，SOLOv2系列模型
-    - 新增行人和车辆垂类目标检测模型
+  - Enhancement of dynamic graph model richness:
+    - Optimize networking and training mode of RCNN models, and improve accuracy of RCNN series models (depending on Paddle Develop or version 2.0.1)
+    - Added support for SSDLite, FCOS, TTFNet, SOLOv2 series models
+    - Added pedestrian and vehicle vertical object detection models
 
-  - 新增动态图基础模块：
-    - 新增MobileNetV3，HRNet骨干网络
-    - 优化RoIAlign计算逻辑，RCNN系列模型精度提升(依赖Paddle develop或2.0.1版本)
-    - 新增支持Synchronized Batch Norm
-    - 新增支持Modulated Deformable Convolution
+  - New dynamic graph basic module:
+    - Added MobileNetV3 and HRNet backbone networks
+    - Improved roi-align calculation logic for RCNN series models (depending on Paddle Develop or version 2.0.1)
+    - Added support for Synchronized Batch Norm
+    - Added support for Modulated Deformable Convolution
 
-  - 预测部署：
-    - 发布动态图python、C++、Serving部署解决方案及文档，支持Faster RCNN，Mask RCNN，YOLOv3，PP-YOLO，SSD，TTFNet，FCOS，SOLOv2等系列模型预测部署
-    - 动态图预测部署支持TensorRT模式FP32，FP16推理加速
+  - Forecast deployment:
+    - Publish dynamic diagrams in python, C++, and Serving deployment solution and documentation. Support Faster RCNN, Mask RCNN, YOLOv3, PPYOLO, SSD, TTFNet, FCOS, SOLOv2 and other models to predict deployment
+    - Dynamic graph prediction deployment supports TensorRT mode FP32, FP16 inference acceleration
 
-  - 检测模型压缩：
-    - 裁剪：新增动态图裁剪支持，并发布YOLOv3-MobileNetV1裁剪模型
-    - 量化：新增动态图量化支持，并发布YOLOv3-MobileNetV1和YOLOv3-MobileNetV3量化模型
+  - Detection model compression:
+    - Prunning: Added dynamic graph prunning support, and released YOLOv3-MobileNetV1 prunning model
+    - Quantization: Added quantization support of dynamic graph, and released quantization models of YOLOv3-MobileNetV1 and YOLOv3-MobileNetV3
 
-  - 文档：
-    - 新增动态图入门教程文档：包含安装说明，快速开始，准备数据，训练/评估/预测流程文档
-    - 新增动态图进阶教程文档：包含模型压缩、推理部署文档
-    - 新增动态图模型库文档
+  - Documents:
+    - New Dynamic Diagram tutorial documentation: includes installation instructions, quick start, data preparation, and training/evaluation/prediction process documentation
+    - New advanced tutorial documentation for dynamic diagrams: includes documentation for model compression and inference deployment
+    - Added dynamic graph model library documentation
 
 ### v2.0-beta(12.20/2020)
-  - 动态图支持:
-    - 支持Faster-RCNN, Mask-RCNN, FPN, Cascade Faster/Mask RCNN, YOLOv3和SSD模型，试用版本。
-  - 模型提升：
-    - 更新PP-YOLO MobileNetv3 large和small模型，精度提升，并新增裁剪和蒸馏后的模型。
-  - 新功能：
-    - 支持VisualDL可视化数据预处理图片。
+  - Dynamic graph support:
+    -  Support for Faster-RCNN, Mask-RCNN, FPN, Cascade Faster/Mask RCNN, YOLOv3 and SSD models, trial version.
+  - Model upgrade:
+    - Updated PP-YOLO Mobile-Netv3 large and small models with improved accuracy, and added prunning and distillation models.
+  - New features:
+    - Support VisualDL visual data preprocessing pictures.
 
-  - Bug修复:
-    - 修复BlazeFace人脸关键点预测bug。
+  - Bug fix:
+    - Fix Blaze Face keypoint prediction bug.
 
 
 ### v0.5.0(11/2020)
-  - 模型丰富度提升：
-    - 发布SOLOv2系列模型，其中SOLOv2-Light-R50-VD-DCN-FPN 模型在单卡V100上达到 38.6 FPS，加速24% ，COCO验证集精度达到38.8%, 提升2.4绝对百分点。
-    - 新增Android移动端检测demo，包括SSD、YOLO系列模型，可直接扫码安装体验。
+  - Model richness enhancement:
+    - SOLOv2 series models were released, in which the SOLOv2-Light-R50-VD-DCN-FPN model achieved 38.6 FPS on a single gpu V100, accelerating by 24%, and the accuracy of COCO verification set reached 38.8%, improving by 2.4 absolute percentage points.
+    - Added Android mobile terminal detection demo, including SSD, YOLO series model, can directly scan code installation experience.
 
-  - 移动端模型优化：
-    - 新增PACT新量化策略，YOLOv3-Mobilenetv3在COCO数据集上比普通量化相比提升0.7%。
+  - Mobile terminal model optimization:
+    - Added to PACT's new quantization strategy, YOLOv3 Mobilenetv3 is 0.7% better than normal quantization on COCO datasets.
 
-  - 易用性提升及功能组件：
-    - 增强generate_proposal_labels算子功能，规避模型出nan风险。
-    - 修复deploy下python与C++预测若干问题。
-    - 统一COCO与VOC数据集下评估流程，支持输出单类AP和P-R曲线。
-    - PP-YOLO支持矩形输入图像。
+  - Ease of use and functional components:
+    - Enhance the function of generate_proposal_labels operator to avoid nan risk of the model.
+    - Fixed several problems with deploy python and C++ prediction.
+    - Unified COCO and VOC datasets under the evaluation process, support the output of a single class of AP and P-R curves.
+    - PP-YOLO supports rectangular input images.
 
-  - 文档：
-    - 新增目标检测全流程教程，新增Jetson平台部署教程。
+  - Documents:
+    - Added object detection whole process tutorial, added Jetson platform deployment tutorial.
 
 
 ### v0.4.0(07/2020)
-  - 模型丰富度提升：
-    - 发布PPYOLO模型，COCO数据集精度达到45.2%，单卡V100预测速度达到72.9 FPS，精度和预测速度优于YOLOv4模型。
-    - 新增TTFNet模型，base版本对齐竞品，COCO数据集精度达到32.9%。
-    - 新增HTC模型，base版本对齐竞品，COCO数据集精度达到42.2%。
-    - 新增BlazeFace人脸关键点检测模型，在Wider-Face数据集的Easy-Set精度达到85.2%。
-    - 新增ACFPN模型， COCO数据集精度达到39.6%。
-    - 发布服务器端通用目标检测模型（包含676类），相同策略在COCO数据集上，V100为19.5FPS时，COCO mAP可以达到49.4%。
+  - Model richness enhancement:
+    - The PPYOLO model was released. The accuracy of COCO dataset reached 45.2%, and the prediction speed of single gpu V100 reached 72.9 FPS, which was better than that of YOL Ov4 model.
+    - New TTFNet model, base version aligned with competing products, COCO dataset accuracy up to 32.9%.
+    - New HTC model, base version aligned with competing products, COCO dataset accuracy up to 42.2%.
+    - BlazeFace key point detection model was added, with an accuracy of 85.2% in Wider-Face's Easy-Set.
+    - ACFPN model was added, and the accuracy of COCO dataset reached 39.6%.
+    - General object detection model (including 676 classes) on the publisher side. On the COCO dataset with the same strategy, when V100 is 19.5FPS, the COCO mAP can reach 49.4%.
 
-  - 移动端模型优化：
-    - 新增SSDLite系列优化模型，包括新增GhostNet的Backbone，新增FPN组件等，精度提升0.5%-1.5%。
+  - Mobile terminal model optimization:
+    - Added SSD Lite series optimization models, including Ghost Net Backbone, FPN components, etc., with accuracy improved by 0.5% and 1.5%.
 
-  - 易用性提升及功能组件：
-    - 新增GridMask, RandomErasing数据增强方法。
-    - 新增Matrix NMS支持。
-    - 新增EMA(Exponential Moving Average)训练支持。
-    - 新增多机训练方法，两机相对于单机平均加速比80%，多机训练支持待进一步验证。
+  - Ease of use and functional components:
+    - Add GridMask, Random Erasing data enhancement method.
+    - Added support for Matrix NMS.
+    - EMA(Exponential Moving Average) training support.
+    - The new multi-machine training method, the average acceleration ratio of two machines to single machine is 80%, multi-machine training support needs to be further verified.
 
 ### v0.3.0(05/2020)
-  - 模型丰富度提升：
-    - 添加Efficientdet-D0模型，速度与精度优于竞品。
-    - 新增YOLOv4预测模型，精度对齐竞品；新增YOLOv4在Pascal VOC数据集上微调训练，精度达到85.5%。
-    - YOLOv3新增MobileNetV3骨干网络，COCO数据集精度达到31.6%。
-    - 添加Anchor-free模型FCOS，精度优于竞品。
-    - 添加Anchor-free模型CornernetSqueeze，精度优于竞品，优化模型的COCO数据集精度38.2%, +3.7%，速度较YOLOv3-Darknet53快5%。
-    - 添加服务器端实用目标检测模型CascadeRCNN-ResNet50vd模型，速度与精度优于竞品EfficientDet。
+  - Model richness enhancement:
+    - Efficientdet-D0 model added, speed and accuracy is better than competing products.
+    - Added YOLOv4 prediction model, precision aligned with competing products; Added YOLOv4 fine tuning training on Pascal VOC datasets with accuracy of 85.5%.
+    - YOLOv3 added MobileNetV3 backbone network, COCO dataset accuracy reached 31.6%.
+    - Add Anchor-free model FCOS, the accuracy is better than competing products.
+    - Anchor-free model Cornernet Squeeze was added, the accuracy was better than competing products, and the accuracy of COCO dataset of optimized model was 38.2% and +3.7%, 5% faster than YOL Ov3 Darknet53.
+    - The CascadeRCNN-ResNet50vd model, which is a practical object detection model on the server side, is added, and its speed and accuracy are better than that of the competitive EfficientDet.
 
-  - 移动端推出3种模型：
-    - SSDLite系列模型：SSDLite-Mobilenetv3 small/large模型，精度优于竞品。
-    - YOLOv3移动端方案: YOLOv3-MobileNetv3模型压缩后加速3.5倍，速度和精度均领先于竞品的SSDLite模型。
-    - RCNN移动端方案：CascadeRCNN-MobileNetv3经过系列优化, 推出输入图像分别为320x320和640x640的模型，速度与精度具有较高性价比。
+  - Mobile terminal launched three models:
+    - SSSDLite model: SSDLite-Mobilenetv3 small/large model, with better accuracy than competitors.
+    - YOLOv3 Mobile solution: The YOLOv3-MobileNetv3 model accelerates 3.5 times after compression, which is faster and more accurate than the SSD Lite model of competing products.
+    - RCNN Mobile terminal scheme: CascadeRCNN-MobileNetv3, after series optimization, launched models with input images of 320x320 and 640x640 respectively, with high cost performance for speed and accuracy.
 
-  - 预测部署重构：
-    - 新增Python预测部署流程，支持RCNN，YOLO，SSD，RetinaNet，人脸系列模型，支持视频预测。
-    - 重构C++预测部署，提高易用性。
+  - Anticipate deployment refactoring:
+    - New Python prediction deployment process, support for RCNN, YOLO, SSD, Retina Net, face models, support for video prediction.
+    - Refactoring C++ predictive deployment to improve ease of use.
 
-  - 易用性提升及功能组件：
-    - 增加AutoAugment数据增强。
-    - 升级检测库文档结构。
-    - 支持迁移学习自动进行shape匹配。
-    - 优化mask分支评估阶段内存占用。
+  - Ease of use and functional components:
+    - Added Auto Augment data enhancement.
+    - Upgrade the detection library document structure.
+    - Support shape matching automatically by transfer learning.
+    - Optimize memory footprint during mask branch evaluation.
 
 ### v0.2.0(02/2020)
-  - 新增模型:
-    - 新增基于CBResNet模型。
-    - 新增LibraRCNN模型。
-    - 进一步提升YOLOv3模型精度，基于COCO数据精度达到43.2%，相比上个版本提升1.4%。
-  - 新增基础模块:
-    - 主干网络: 新增CBResNet。
-    - loss模块: YOLOv3的loss支持细粒度op组合。
-    - 正则模块: 新增DropBlock模块。
-  - 功能优化和改进:
-    - 加速YOLOv3数据预处理，整体训练提速40%。
-    - 优化数据预处理逻辑，提升易用性。
-    - 增加人脸检测预测benchmark数据。
-    - 增加C++预测引擎Python API预测示例。
-  - 检测模型压缩 :
-    - 裁剪: 发布MobileNet-YOLOv3裁剪方案和模型，基于VOC数据FLOPs - 69.6%, mAP + 1.4%，基于COCO数据FLOPS-28.8%, mAP + 0.9%; 发布ResNet50vd-dcn-YOLOv3裁剪方案和模型，基于COCO数据集FLOPS - 18.4%, mAP + 0.8%。
-    - 蒸馏: 发布MobileNet-YOLOv3蒸馏方案和模型，基于VOC数据mAP + 2.8%，基于COCO数据mAP + 2.1%。
-    - 量化: 发布YOLOv3-MobileNet和BlazeFace的量化模型。
-    - 裁剪+蒸馏: 发布MobileNet-YOLOv3裁剪+蒸馏方案和模型，基于COCO数据FLOPS - 69.6%，基于TensorRT预测加速64.5%，mAP - 0.3 %; 发布ResNet50vd-dcn-YOLOv3裁剪+蒸馏方案和模型，基于COCO数据FLOPS - 43.7%，基于TensorRT预测加速24.0%，mAP + 0.6 %。
-    - 搜索: 开源BlazeFace-Nas的完成搜索方案。
-  - 预测部署:
-    - 集成 TensorRT，支持FP16、FP32、INT8量化推理加速。
-  - 文档:
-    - 增加详细的数据预处理模块介绍文档以及实现自定义数据Reader文档。
-    - 增加如何新增算法模型的文档。
-    - 文档部署到网站: https://paddledetection.readthedocs.io
+  - The new model:
+    - Added CBResNet model.
+    - Added LibraRCNN model.
+    - The accuracy of YOLOv3 model was further improved, and the accuracy based on COCO data reached 43.2%, 1.4% higher than the previous version.
+  - New Basic module:
+    - Trunk network: CBResNet is added.
+    - Loss module: Loss of YOLOv3 supports fine-grained OP combinations.
+    - Regular module: Added the Drop Block module.
+  - Function optimization and improvement:
+    - Accelerate YOLOv3 data preprocessing and increase the overall training speed by 40%.
+    - Optimize data preprocessing logic to improve ease of use.
+    - dd face detection prediction benchmark data.
+    - Added C++ prediction engine Python API prediction example.
+  - Detection model compression:
+    - prunning: Release MobileNet-YOLOv3 prunning scheme and model, based on VOC data FLOPs 69.6%, mAP + 1.4%, based on COCO DATA FLOPS 28.8%, mAP + 0.9%; Release ResNet50vd-DCN-YOLOv3 clipped solution and model based on COCO datasets 18.4%, mAP + 0.8%.
+    - Distillation: Release MobileNet-YOLOv3 distillation scheme and model, based on VOC data mAP + 2.8%, COCO data mAP + 2.1%.
+    - Quantification: Release quantification models of YOLOv3 Mobile Net and Blaze Face.
+    - Prunning + distillation: release MobileNet-YOLOv3 prunning + distillation solution and model, 69.6% based on COCO DATA FLOPS, 64.5% based on TensorRT prediction acceleration, 0.3% mAP; Release ResNet50vd-DCN-YOLOv3 tailoring + distillation solution and model, 43.7% based on COCO Data FLOPS, 24.0% based on TensorRT prediction acceleration, mAP + 0.6%.
+    - Search: Open source Blaze Face Nas complete search solution.
+  - Predict deployment:
+    - Integrated TensorRT, support FP16, FP32, INT8 quantitative inference acceleration.
+  - Document:
+    - Add detailed data preprocessing module to introduce documents and implement custom data Reader documents.
+    - Added documentation on how to add algorithm models.
+    - Document deployment to the web site: https://paddledetection.readthedocs.io
 
 ### 12/2019
-- 增加Res2Net模型。
-- 增加HRNet模型。
-- 增加GIOU loss和DIOU loss。
+- Add Res2Net model.
+- Add HRNet model.
+- Add GIOU loss and DIOU loss。
 
 
 ### 21/11/2019
-- 增加CascadeClsAware RCNN模型。
-- 增加CBNet，ResNet200和Non-local模型。
-- 增加SoftNMS。
-- 增加Open Image V5数据集和Objects365数据集模型。
+- Add CascadeClsAware RCNN model.
+- Add CBNet, ResNet200 and Non-local model.
+- Add SoftNMS.
+- Add Open Image V5 dataset and Objects365 dataset model
 
 ### 10/2019
-- 增加增强版YOLOv3模型，精度高达41.4%。
-- 增加人脸检测模型BlazeFace、Faceboxes。
-- 丰富基于COCO的模型，精度高达51.9%。
-- 增加Objects365 2019 Challenge上夺冠的最佳单模型之一CACascade-RCNN。
-- 增加行人检测和车辆检测预训练模型。
-- 支持FP16训练。
-- 增加跨平台的C++推理部署方案。
-- 增加模型压缩示例。
+- Added enhanced YOLOv3 model with accuracy up to 41.4%.
+- Added Face detection models BlazeFace and Faceboxes.
+- Rich COCO based models, accuracy up to 51.9%.
+- Added CA-Cascade-RCNN, one of the best single models to win on Objects365 2019 Challenge.
+- Add pedestrian detection and vehicle detection pre-training models.
+- Support FP16 training.
+- Added cross-platform C++ inference deployment scheme.
+- Add model compression examples.
 
 
 ### 2/9/2019
-- 增加GroupNorm模型。
-- 增加CascadeRCNN+Mask模型。
+- Add GroupNorm model.
+- Add CascadeRCNN+Mask model.
 
 ### 5/8/2019
-- 增加Modulated Deformable Convolution系列模型。
+- Add Modulated Deformable Convolution series model
 
 ### 29/7/2019
 
-- 增加检测库中文文档
-- 修复R-CNN系列模型训练同时进行评估的问题
-- 新增ResNext101-vd + Mask R-CNN + FPN模型
-- 新增基于VOC数据集的YOLOv3模型
+- Add detection library Chinese document
+- Fixed an issue where R-CNN series model training was evaluated simultaneously
+- Add ResNext101-vd + Mask R-CNN + FPN models
+- Added YOLOv3 model based on VOC dataset
 
 ### 3/7/2019
 
-- 首次发布PaddleDetection检测库和检测模型库
-- 模型包括：Faster R-CNN, Mask R-CNN, Faster R-CNN+FPN, Mask
+- First release of PaddleDetection Detection library and Detection model library
+- models：Faster R-CNN, Mask R-CNN, Faster R-CNN+FPN, Mask
   R-CNN+FPN, Cascade-Faster-RCNN+FPN, RetinaNet, YOLOv3, 和SSD.

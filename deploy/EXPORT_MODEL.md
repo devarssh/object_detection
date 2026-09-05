@@ -1,54 +1,53 @@
-# PaddleDetection模型导出教程
+# PaddleDetection Model Export Tutorial
 
-## 一、模型导出
-本章节介绍如何使用`tools/export_model.py`脚本导出模型。
-### 1、导出模输入输出说明
-- 输入变量以及输入形状如下：
+## 一、Model Export
+This section describes how to use the `tools/export_model.py` script to export models.
+### Export model input and output description
+- Input variables and input shapes are as follows:
 
-  | 输入名称 | 输入形状 | 表示含义 |
-  | :---------: | ----------- | ---------- |
-  | image |  [None, 3, H, W] | 输入网络的图像，None表示batch维度，如果输入图像大小为变长，则H,W为None |
-  | im_shape | [None, 2] | 图像经过resize后的大小，表示为H,W, None表示batch维度 |
-  | scale_factor | [None, 2] | 输入图像大小比真实图像大小，表示为scale_y, scale_x |
+  |  Input Name  | Input Shape     | Meaning                                                                                                                   |
+  | :----------: | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+  |    image     | [None, 3, H, W] | Enter the network image. None indicates the Batch dimension. If the input image size is variable length, H and W are None |
+  |   im_shape   | [None, 2]       | The size of the image after resize is expressed as H,W, and None represents the Batch dimension                           |
+  | scale_factor | [None, 2]       | The input image size is larger than the real image size, denoted byscale_y, scale_x                                       |
 
-**注意**具体预处理方式可参考配置文件中TestReader部分。
-
-
-- PaddleDetection中动转静导出模型输出统一为：
-
-  - bbox, NMS的输出，形状为[N, 6], 其中N为预测框的个数，6为[class_id, score, x1, y1, x2, y2]。
-  - bbox\_num, 每张图片对应预测框的个数，例如batch_size为2，输出为[N1, N2], 表示第一张图包含N1个预测框，第二张图包含N2个预测框，并且预测框的总个数和NMS输出的第一维N相同
-  - mask，如果网络中包含mask，则会输出mask分支
-
-**注意**模型动转静导出不支持模型结构中包含numpy相关操作的情况。
+**Attention**For details about the preprocessing method, see the Test Reader section in the configuration file.
 
 
-### 2、启动参数说明
+-The output of the dynamic and static derived model in Paddle Detection is unified as follows:
 
-|      FLAG      |      用途      |    默认值    |                 备注                      |
-|:--------------:|:--------------:|:------------:|:-----------------------------------------:|
-|       -c       |  指定配置文件  |     None     |                                           |
-|  --output_dir  |  模型保存路径  |  `./output_inference`  |  模型默认保存在`output/配置文件名/`路径下 |
+  - bbox, the output of NMS, in the shape of [N, 6], where N is the number of prediction boxes, and 6 is [class_id, score, x1, y1, x2, y2].
+  - bbox\_num, Each picture corresponds to the number of prediction boxes. For example, batch size is 2 and the output is [N1, N2], indicating that the first picture contains N1 prediction boxes and the second picture contains N2 prediction boxes, and the total number of prediction boxes is the same as the first dimension N output by NMS
+  - mask, If the network contains a mask, the mask branch is printed
 
-### 3、使用示例
+**Attention**The model-to-static export does not support cases where numpy operations are included in the model structure.
 
-使用训练得到的模型进行试用，脚本如下
+
+### 2、Start Parameters
+
+|     FLAG     |               USE               |       DEFAULT        |                                 NOTE                                  |
+| :----------: | :-----------------------------: | :------------------: | :-------------------------------------------------------------------: |
+|      -c      | Specifying a configuration file |         None         |                                                                       |
+| --output_dir |         Model save path         | `./output_inference` | The model is saved in the `output/default_file_name/` path by default |
+
+### 3、Example
+
+Using the trained model for trial use, the script is as follows:
 
 ```bash
-# 导出YOLOv3模型
+# The YOLOv3 model is exported
 python tools/export_model.py -c configs/yolov3/yolov3_darknet53_270e_coco.yml --output_dir=./inference_model \
  -o weights=weights/yolov3_darknet53_270e_coco.pdparams
 ```
+The prediction model will be exported to the `inference_model/yolov3_darknet53_270e_coco` directory. `infer_cfg.yml`, `model.pdiparams`,  `model.pdiparams.info`, `model.pdmodel` respectively.
 
-预测模型会导出到`inference_model/yolov3_darknet53_270e_coco`目录下，分别为`infer_cfg.yml`, `model.pdiparams`,  `model.pdiparams.info`, `model.pdmodel`。
 
+### 4、Sets the input size of the export model
+When using Fluid TensorRT for prediction, since <= TensorRT 5.1 only supports fixed-length input, the image size of the `data` layer of the saved model needs to be the same as the actual input image size. Fluid C++ prediction engine does not have this limitation. Setting `image_shape` in Test Reader changes the size of the input image in the saved model. The following is an example:
 
-### 4、设置导出模型的输入大小
-
-使用Fluid-TensorRT进行预测时，由于<=TensorRT 5.1的版本仅支持定长输入，保存模型的`data`层的图片大小需要和实际输入图片大小一致。而Fluid C++预测引擎没有此限制。设置TestReader中的`image_shape`可以修改保存模型中的输入图片大小。示例如下:
 
 ```bash
-# 导出YOLOv3模型，输入是3x640x640
+#Export the YOLOv3 model with the input 3x640x640
 python tools/export_model.py -c configs/yolov3/yolov3_darknet53_270e_coco.yml --output_dir=./inference_model \
  -o weights=weights/yolov3_darknet53_270e_coco.pdparams TestReader.inputs_def.image_shape=[3,640,640]
 ```

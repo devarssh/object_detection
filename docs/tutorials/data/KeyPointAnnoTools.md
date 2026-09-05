@@ -1,29 +1,28 @@
-简体中文 | [English](KeyPointAnnoTools_en.md)
 
-# 关键点检测标注工具
+# Key Points Detection Annotation Tool
 
-## 目录
+## Concents
 
 [LabelMe](#LabelMe)
 
-- [使用说明](#使用说明)
-  - [安装](#安装)
-  - [关键点数据说明](#关键点数据说明)
-  - [图片标注过程](#图片标注过程)
-- [标注格式](#标注格式)
-  - [导出数据格式](#导出数据格式)
-  - [格式转化总结](#格式转化总结)
-  - [标注文件(json)-->COCO](#标注文件(json)-->COCO数据集)
+- [Instruction](#Instruction)
+  - [Installation](#Installation)
+  - [Notes of Key Points Data](#Notes-of-Key-Points-Data)
+  - [Annotation of LabelMe](#Annotation-of-LabelMe)
+- [Annotation Format](#Annotation-Format)
+  - [Data Export Format](#Data-Export-Format)
+  - [Summary of Format Conversion](#Summary-of-Format-Conversion)
+  - [Annotation file(json)—>COCO Dataset](#annotation-filejsoncoco-dataset)
 
 
 
 ## [LabelMe](https://github.com/wkentaro/labelme)
 
-### 使用说明
+### Instruction
 
-#### 安装
+#### Installation
 
-具体安装操作请参考[LabelMe官方教程](https://github.com/wkentaro/labelme)中的Installation
+Please refer to [The github of LabelMe](https://github.com/wkentaro/labelme) for installation details.
 
 <details>
 <summary><b> Ubuntu</b></summary>
@@ -59,7 +58,7 @@ brew install wkentaro/labelme/labelme  # command line interface
 
 
 
-推荐使用Anaconda的安装方式
+We recommend installing by Anoncanda.
 
 ```
 conda create –name=labelme python=3
@@ -70,9 +69,9 @@ pip install labelme
 
 
 
-#### 关键点数据说明
+#### Notes of Key Points Data
 
-以COCO数据集为例，共需采集17个关键点
+COCO dataset needs to collect 17 key points.
 
 ```
 keypoint indexes:
@@ -99,43 +98,43 @@ keypoint indexes:
 
 
 
-#### 图片标注过程
+#### Annotation of LabelMe
 
-启动labelme后，选择图片文件或者图片所在文件夹
+After starting labelme, select an image or an folder with images.
 
-左侧编辑栏选择`create polygons` ，右击图像区域选择标注形状，绘制好关键点后按下回车，弹出新的框填入标注关键点对应的标签
+Select  `create polygons`   in the formula bar. Draw an annotation area as shown in the following  GIF. You can right-click on the image to select different shape. When finished, press the Enter/Return key, then fill the corresponding label in the popup box, such as, people.
 
-左侧菜单栏点击保存，生成`json`形式的**标注文件**
+Click the save button in the formula bar，it will generate an annotation file in json.
 
 ![操作说明](https://user-images.githubusercontent.com/34162360/178250648-29ee781a-676b-419c-83b1-de1e4e490526.gif)
 
 
 
-### 标注格式
+### Annotation Format
 
-#### 导出数据格式
-
-```
-#生成标注文件
-png/jpeg/jpg-->labelme标注-->json
-```
-
-
-
-#### 格式转化总结
+#### Data Export Format
 
 ```
-#标注文件转化为COCO数据集格式
-json-->labelme2coco.py-->COCO数据集
+#generate an annotation file
+png/jpeg/jpg-->labelme-->json
 ```
 
 
 
+#### Summary of Format Conversion
+
+```
+#convert annotation file to COCO dataset format
+json-->labelme2coco.py-->COCO dataset
+```
 
 
-#### 标注文件(json)-->COCO数据集
 
-使用[PaddleDetection提供的x2coco.py](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/tools/x2coco.py) 将labelme标注的数据转换为COCO数据集形式
+
+
+#### Annotation file(json)—>COCO Dataset
+
+Convert the data annotated by LabelMe to COCO dataset by this script [x2coco.py](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/tools/x2coco.py).
 
 ```bash
 python tools/x2coco.py \
@@ -148,13 +147,13 @@ python tools/x2coco.py \
                 --test_proportion 0.0
 ```
 
-用户数据集转成COCO数据后目录结构如下（注意数据集中路径名、文件名尽量不要使用中文，避免中文编码问题导致出错）：
+After the user dataset is converted to COCO data, the directory structure is as follows (note that the path name and file name in the dataset should not use Chinese as far as possible to avoid errors caused by Chinese coding problems):
 
 ```
 dataset/xxx/
 ├── annotations
-│   ├── train.json  # coco数据的标注文件
-│   ├── valid.json  # coco数据的标注文件
+│   ├── train.json  # Annotation file of coco data
+│   ├── valid.json  # Annotation file of coco data
 ├── images
 │   ├── xxx1.jpg
 │   ├── xxx2.jpg

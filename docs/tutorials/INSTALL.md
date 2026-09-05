@@ -1,4 +1,3 @@
-English | [简体中文](INSTALL_cn.md)
 
 # Installation
 

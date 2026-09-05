@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection 昆仑芯 XPU C++部署示例
 
 本目录下提供`infer.cc`快速完成PPYOLOE模型包括PPYOLOE在昆仑芯 XPU加速部署的示例。 

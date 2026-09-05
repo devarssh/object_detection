@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文  
 
 # PaddleDetection 检测模型在瑞芯微NPU上的部署方案-FastDeploy
 

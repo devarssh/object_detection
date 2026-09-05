@@ -1,34 +1,33 @@
-# PaddleDetection模型导出为ONNX格式教程
+# PaddleDetection Model Export as ONNX Format Tutorial
 
-PaddleDetection模型支持保存为ONNX格式，目前测试支持的列表如下
-| 模型  | OP版本 | 备注 |
+PaddleDetection Model support is saved in ONNX format and the list of current test support is as follows
+| Model  | OP Version | NOTE |
 | :---- | :----- | :--- |
-| YOLOv3 |  11   |  仅支持batch=1推理；模型导出需固定shape |
-| PP-YOLO | 11 | 仅支持batch=1推理；MatrixNMS将被转换NMS，精度略有变化；模型导出需固定shape |
-| PP-YOLOv2 | 11 | 仅支持batch=1推理；MatrixNMS将被转换NMS，精度略有变化；模型导出需固定shape |
-| PP-YOLO Tiny | 11 | 仅支持batch=1推理；模型导出需固定shape |
-| PP-YOLOE | 11 | 仅支持batch=1推理；模型导出需固定shape |
-| PP-PicoDet | 11 | 仅支持batch=1推理；模型导出需固定shape |
-| FCOS | 11 |仅支持batch=1推理 |
+| YOLOv3 |  11   |  Only batch=1 inferring is supported. Model export needs fixed shape |
+| PP-YOLO | 11 | Only batch=1 inferring is supported. A MatrixNMS will be converted to an NMS with slightly different precision; Model export needs fixed shape |
+| PP-YOLOv2 | 11 | Only batch=1 inferring is supported. MatrixNMS will be converted to NMS with slightly different precision; Model export needs fixed shape |
+| PP-YOLO Tiny | 11 | Only batch=1 inferring is supported. Model export needs fixed shape |
+| PP-YOLOE | 11 | Only batch=1 inferring is supported. Model export needs fixed shape |
+| PP-PicoDet | 11 | Only batch=1 inferring is supported. Model export needs fixed shape |
+| FCOS | 11 |Only batch=1 inferring is supported |
 | PAFNet | 11 |- |
 | TTFNet | 11 |-|
-| SSD | 11 |仅支持batch=1推理 |
+| SSD | 11 |Only batch=1 inferring is supported |
 | PP-TinyPose | 11 | - |
-| Faster RCNN | 16 | 仅支持batch=1推理, 依赖0.9.7及以上版本|
-| Mask RCNN | 16 | 仅支持batch=1推理, 依赖0.9.7及以上版本|
-| Cascade RCNN | 16 | 仅支持batch=1推理, 依赖0.9.7及以上版本|
-| Cascade Mask RCNN | 16 | 仅支持batch=1推理, 依赖0.9.7及以上版本|
-
-保存ONNX的功能由[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX)提供，如在转换中有相关问题反馈，可在Paddle2ONNX的Github项目中通过[ISSUE](https://github.com/PaddlePaddle/Paddle2ONNX/issues)与工程师交流。
-
-## 导出教程
-
-### 步骤一、导出PaddlePaddle部署模型
+| Faster RCNN | 16 | Only batch=1 inferring is supported, require paddle2onnx>=0.9.7|
+| Mask RCNN | 16 | Only batch=1 inferring is supported, require paddle2onnx>=0.9.7|
+| Cascade RCNN | 16 | Only batch=1 inferring is supported, require paddle2onnx>=0.9.7|
+| Cascade Mask RCNN | 16 | Only batch=1 inferring is supported, require paddle2onnx>=0.9.7|
 
 
-导出步骤参考文档[PaddleDetection部署模型导出教程](./EXPORT_MODEL.md), 导出示例如下
+The function of saving ONNX is provided by [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX). If there is feedback on related problems during conversion, Communicate with engineers in Paddle2ONNX's Github project via [ISSUE](https://github.com/PaddlePaddle/Paddle2ONNX/issues).
 
-- 非RCNN系列模型, 以YOLOv3为例
+## Export Tutorial
+
+### Step 1. Export the Paddle deployment model
+Export procedure reference document[Tutorial on PaddleDetection deployment model export](./EXPORT_MODEL_en.md), for example:
+
+- Models except RCNN series, take YOLOv3 as example
 ```
 cd PaddleDetection
 python tools/export_model.py -c configs/yolov3/yolov3_darknet53_270e_coco.yml \
@@ -36,19 +35,19 @@ python tools/export_model.py -c configs/yolov3/yolov3_darknet53_270e_coco.yml \
                              TestReader.inputs_def.image_shape=[3,608,608] \
                              --output_dir inference_model
 ```
-导出后的模型保存在`inference_model/yolov3_darknet53_270e_coco/`目录中，结构如下
+The derived models were saved in `inference_model/yolov3_darknet53_270e_coco/`, with the structure as follows
 ```
 yolov3_darknet
-  ├── infer_cfg.yml          # 模型配置文件信息
-  ├── model.pdiparams        # 静态图模型参数
-  ├── model.pdiparams.info   # 参数额外信息，一般无需关注
-  └── model.pdmodel          # 静态图模型文件
+  ├── infer_cfg.yml          # Model configuration file information
+  ├── model.pdiparams        # Static diagram model parameters
+  ├── model.pdiparams.info   # Parameter Information is not required
+  └── model.pdmodel          # Static diagram model file
 ```
-> 注意导出时的参数`TestReader.inputs_def.image_shape`，对于YOLO系列模型注意导出时指定该参数，否则无法转换成功
+> check`TestReader.inputs_def.image_shape`, For YOLO series models, specify this parameter when exporting; otherwise, the conversion fails
 
-- RCNN系列模型，以Faster RCNN为例
+- RCNN series models, take Faster RCNN as example
 
-RCNN系列模型导出ONNX模型时，需要去除模型中的控制流，因此需要额外添加`export_onnx=True` 字段
+The conditional block needs to be removed in RCNN series when export ONNX model. Add `export_onnx=True` in command line
 ```
 cd PaddleDetection
 python tools/export_model.py -c configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.yml \
@@ -56,22 +55,21 @@ python tools/export_model.py -c configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.
                              export_onnx=True \
                              --output_dir inference_model
 ```
-
-导出的模型保存在`inference_model/faster_rcnn_r50_fpn_1x_coco/`目录中，结构如下
+The derived models were saved in `inference_model/faster_rcnn_r50_fpn_1x_coco/`, with the structure as follows
 ```
 faster_rcnn_r50_fpn_1x_coco
-  ├── infer_cfg.yml          # 模型配置文件信息
-  ├── model.pdiparams        # 静态图模型参数
-  ├── model.pdiparams.info   # 参数额外信息，一般无需关注
-  └── model.pdmodel          # 静态图模型文件
+  ├── infer_cfg.yml          # Model configuration file information
+  ├── model.pdiparams        # Static diagram model parameters
+  ├── model.pdiparams.info   # Parameter Information is not required
+  └── model.pdmodel          # Static diagram model file
 ```
 
-### 步骤二、将部署模型转为ONNX格式
-安装Paddle2ONNX（高于或等于0.9.7版本)
+### Step 2. Convert the deployment model to ONNX format
+Install Paddle2ONNX (version 0.9.7 or higher)
 ```
 pip install paddle2onnx
 ```
-使用如下命令转换
+Use the following command to convert
 ```
 # YOLOv3
 paddle2onnx --model_dir inference_model/yolov3_darknet53_270e_coco \
@@ -87,16 +85,16 @@ paddle2onnx --model_dir inference_model/faster_rcnn_r50_fpn_1x_coco \
             --opset_version 16 \
             --save_file faster_rcnn.onnx
 ```
-转换后的模型即为在当前路径下的`yolov3.onnx`和`faster_rcnn.onnx`
+The transformed model is under the current path`yolov3.onnx` and `faster_rcnn.onnx`
 
-### 步骤三、使用onnxruntime进行推理
-安装onnxruntime
+### Step 3. Inference with onnxruntime
+Install onnxruntime
 ```
 pip install onnxruntime
 ```
-推理代码示例在[deploy/third_engine/onnx](./third_engine/onnx)下
+Inference code examples are in [deploy/third_engine/onnx](./third_engine/onnx)
 
-使用如下命令进行推理：
+Use the following commands for inference：
 ```
 # YOLOv3
 python deploy/third_engine/onnx/infer.py

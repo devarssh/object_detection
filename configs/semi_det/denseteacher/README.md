@@ -1,4 +1,3 @@
-简体中文 | [English](README_en.md)
 
 # Dense Teacher: Dense Pseudo-Labels for Semi-supervised Object Detection
 

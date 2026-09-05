@@ -1,4 +1,3 @@
-English | [简体中文](README_cn.md)
 # PaddleDetection applied for specific scenarios
 
 We provide some models implemented by PaddlePaddle to detect objects in specific scenarios, users can download the models and use them in these scenarios.

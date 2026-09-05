@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 
 # PaddleDetection检测模型在华为昇腾上的部署方案—FastDeploy
 

@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 
 # PaddleDetection 检测模型在晶晨NPU上的部署方案部署方案—FastDeploy  
 

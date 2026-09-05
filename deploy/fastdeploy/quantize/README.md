@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文  
 
 # PaddleDetection 量化模型部署-FastDeploy
 

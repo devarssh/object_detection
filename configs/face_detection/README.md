@@ -1,29 +1,28 @@
-# 人脸检测模型
+# Face Detection Model
 
-## 简介
-`face_detection`中提供高效、高速的人脸检测解决方案，包括最先进的模型和经典模型。
+## Introduction
+`face_detection` High efficiency, high speed face detection solutions, including the most advanced models and classic models.
 
 ![](../../docs/images/12_Group_Group_12_Group_Group_12_935.jpg)
 
-## 模型库
+## Model Library
 
-#### WIDER-FACE数据集上的mAP
+#### A mAP on the WIDERFACE dataset
 
-| 网络结构 | 输入尺寸 | 图片个数/GPU | 学习率策略 | Easy/Medium/Hard Set  | 预测时延（SD855）| 模型大小(MB) | 下载 | 配置文件 |
+| Network structure | size | images/GPUs | Learning rate strategy | Easy/Medium/Hard Set  | Prediction delay（SD855）| Model size(MB) | Download | Configuration File |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace  | 640  |    8    | 1000e     | 0.885 / 0.855 / 0.731 | - | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/face_detection/blazeface_1000e.yml) |
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000e     | 0.907 / 0.883 / 0.793 | - | 0.479 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace  | 640  |    8    | 1000e     | 0.885 / 0.855 / 0.731 | - | 0.472 |[link](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/face_detection/blazeface_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000e     | 0.907 / 0.883 / 0.793 | - | 0.479 |[link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
-**注意:**  
-- 我们使用多尺度评估策略得到`Easy/Medium/Hard Set`里的mAP。具体细节请参考[在WIDER-FACE数据集上评估](#在WIDER-FACE数据集上评估)。
+**Attention:**  
+- We use a multi-scale evaluation strategy to get the mAP in `Easy/Medium/Hard Set`. Please refer to the [evaluation on the WIDER FACE dataset](#Evaluated-on-the-WIDER-FACE-Dataset) for details.
 
-## 快速开始
+## Quick Start
 
-### 数据准备
-我们使用[WIDER-FACE数据集](http://shuoyang1213.me/WIDERFACE/)进行训练和模型测试，官方网站提供了详细的数据介绍。
-- WIDER-Face数据源:  
-使用如下目录结构加载`wider_face`类型的数据集：
-
+### Data preparation
+We use [WIDER-FACE dataset](http://shuoyang1213.me/WIDERFACE/) for training and model tests, the official web site provides detailed data is introduced.
+- WIDER-Face data source:  
+- Load a dataset of type `wider_face` using the following directory structure:
   ```
   dataset/wider_face/
   ├── wider_face_split
@@ -47,72 +46,72 @@
   │   │   │   ...
   ```
 
-- 手动下载数据集：
-要下载WIDER-FACE数据集，请运行以下命令：
+- Manually download the dataset:
+To download the WIDER-FACE dataset, run the following command:
 ```
 cd dataset/wider_face && ./download_wider_face.sh
 ```
 
-### 参数配置
-基础模型的配置可以参考`configs/face_detection/_base_/blazeface.yml`；
-改进模型增加FPN和SSH的neck结构，配置文件可以参考`configs/face_detection/_base_/blazeface_fpn.yml`，可以根据需求配置FPN和SSH，具体如下：
+### Parameter configuration
+The configuration of the base model can be referenced to `configs/face_detection/_base_/blazeface.yml`；
+Improved model to add FPN and SSH neck structure, configuration files can be referenced to `configs/face_detection/_base_/blazeface_fpn.yml`, You can configure FPN and SSH as required
 ```yaml
 BlazeNet:
    blaze_filters: [[24, 24], [24, 24], [24, 48, 2], [48, 48], [48, 48]]
    double_blaze_filters: [[48, 24, 96, 2], [96, 24, 96], [96, 24, 96],
                            [96, 24, 96, 2], [96, 24, 96], [96, 24, 96]]
-   act: hard_swish #配置backbone中BlazeBlock的激活函数，基础模型为relu，增加FPN和SSH时需使用hard_swish
+   act: hard_swish #Configure Blaze Block activation function in Backbone. The basic model is Relu. hard_swish is needed to add FPN and SSH
 
 BlazeNeck:
-   neck_type : fpn_ssh #可选only_fpn、only_ssh和fpn_ssh
+   neck_type : fpn_ssh #only_fpn, only_ssh and fpn_ssh
    in_channel: [96,96]
 ```
 
 
 
-### 训练与评估
-训练流程与评估流程方法与其他算法一致，请参考[GETTING_STARTED_cn.md](../../docs/tutorials/GETTING_STARTED_cn.md)。  
-**注意:** 人脸检测模型目前不支持边训练边评估。
+### Training and Evaluation
+The training process and evaluation process methods are consistent with other algorithms, please refer to [GETTING_STARTED_cn.md](../../docs/tutorials/GETTING_STARTED_cn.md)。  
+**Attention:** Face detection models currently do not support training and evaluation.
 
-#### 在WIDER-FACE数据集上评估
-- 步骤一：评估并生成结果文件：
+#### Evaluated on the WIDER-FACE Dataset
+- Step 1: Evaluate and generate a result file:
 ```shell
 python -u tools/eval.py -c configs/face_detection/blazeface_1000e.yml \
        -o weights=output/blazeface_1000e/model_final \
        multi_scale=True
 ```
-设置`multi_scale=True`进行多尺度评估，评估完成后，将在`output/pred`中生成txt格式的测试结果。
+Set `multi_scale=True` for multi-scale evaluation. After evaluation, test results in TXT format will be generated in `output/pred`.
 
-- 步骤二：下载官方评估脚本和Ground Truth文件：
+- Step 2: Download the official evaluation script and Ground Truth file:
 ```
 wget http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/support/eval_script/eval_tools.zip
 unzip eval_tools.zip && rm -f eval_tools.zip
 ```
 
-- 步骤三：开始评估
+- Step 3: Start the evaluation
 
-方法一：python评估：
+Method 1: Python evaluation:
 ```
 git clone https://github.com/wondervictor/WiderFace-Evaluation.git
 cd WiderFace-Evaluation
-# 编译
+# compile
 python3 setup.py build_ext --inplace
-# 开始评估
+# Begin to assess
 python3 evaluation.py -p /path/to/PaddleDetection/output/pred -g /path/to/eval_tools/ground_truth
 ```
 
-方法二：MatLab评估：
+Method 2: MatLab evaluation:
 ```
-# 在`eval_tools/wider_eval.m`中修改保存结果路径和绘制曲线的名称：
+# Change the name of save result path and draw curve in `eval_tools/wider_eval.m`:
 pred_dir = './pred';  
 legend_name = 'Paddle-BlazeFace';
 
-`wider_eval.m` 是评估模块的主要执行程序。运行命令如下：
+`wider_eval.m` is the main implementation of the evaluation module. Run the following command:
 matlab -nodesktop -nosplash -nojvm -r "run wider_eval.m;quit;"
 ```
 
-### Python脚本预测
-为了支持二次开发，这里提供通过Python脚本使用Paddle Detection whl包来进行预测的示例。
+### Use by Python Code
+In order to support development, here is an example of using the Paddle Detection whl package to make predictions through Python code.
 ```python
 import cv2
 import paddle
@@ -124,7 +123,7 @@ from ppdet.data.transform.operators import NormalizeImage, Permute
 
 
 if __name__ == '__main__':
-    # 准备基础的参数
+    # prepare for the parameters
     config_path = 'PaddleDetection/configs/face_detection/blazeface_1000e.yml'
     cfg = load_config(config_path)
     weight_path = 'PaddleDetection/output/blazeface_1000e.pdparams'
@@ -132,16 +131,16 @@ if __name__ == '__main__':
     cfg.weights = weight_path
     bbox_thre = 0.8
     paddle.set_device('gpu')
-    # 创建所需的类
+    # create the class object
     trainer = Trainer(cfg, mode='test')
     trainer.load_weights(cfg.weights)
     trainer.model.eval()
     normaler = NormalizeImage(mean=[123, 117, 104], std=[127.502231, 127.502231, 127.502231], is_scale=False)
     permuter = Permute()
-    # 进行图片读取
+    # read the image file
     im = cv2.imread(infer_img_path)
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    # 准备数据字典
+    # prepare for the data dict
     data_dict = {'image': im}
     data_dict = normaler(data_dict)
     data_dict = permuter(data_dict)
@@ -151,9 +150,9 @@ if __name__ == '__main__':
     data_dict['scale_factor'] = paddle.Tensor(np.array([[1., 1.]], dtype=np.float32))
     data_dict['image'] = paddle.Tensor(data_dict['image'].reshape((1, c, h, w)))
     data_dict['curr_iter'] = paddle.Tensor(np.array([0]))
-    # 进行预测
+    # do the prediction
     outs = trainer.model(data_dict)
-    # 对预测的数据进行后处理得到最终的bbox信息
+    # to do the postprocess to get the final bbox info
     for key in ['im_shape', 'scale_factor', 'im_id']:
         outs[key] = data_dict[key]
     for key, value in outs.items():
@@ -163,6 +162,7 @@ if __name__ == '__main__':
     bbox = [sub_dict for sub_dict in batch_res['bbox'] if sub_dict['score'] > bbox_thre]
     print(bbox)
 ```
+
 
 ## Citations
 

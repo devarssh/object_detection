@@ -1,267 +1,270 @@
-[English](pphuman_action_en.md) | 简体中文
 
-# PP-Human行为识别模块
+# Action Recognition Module of PP-Human
 
-## 目录
+Action Recognition is widely used in the intelligent community/smart city, and security monitoring. PP-Human provides the module of video-classification-based, detection-based, image-classification-based and skeleton-based action recognition.
 
-- [基于骨骼点的行为识别](#基于骨骼点的行为识别)
-- [基于图像分类的行为识别](#基于图像分类的行为识别)
-- [基于检测的行为识别](#基于检测的行为识别)
-- [基于行人轨迹的行为识别](#基于行人轨迹的行为识别)
-- [基于视频分类的行为识别](#基于视频分类的行为识别)
+## Model Zoo
 
-行为识别在智慧社区，安防监控等方向具有广泛应用，根据行为的不同，PP-Human中集成了基于视频分类、基于检测、基于图像分类，基于行人轨迹以及基于骨骼点的行为识别模块，方便用户根据需求进行选择。
+There are multiple available pretrained models including pedestrian detection/tracking, keypoint detection, fighting, calling, smoking and fall detection models. Users can download and use them directly.
 
-## 基于骨骼点的行为识别
+| Task                          | Algorithm | Precision                 | Inference Speed(ms)                 | Model Weights |Model Inference and Deployment                                                                             |
+|:----------------------------- |:---------:|:-------------------------:|:-----------------------------------:| :-----------------:  |:-----------------------------------------------------------------------------------------:|
+| Pedestrian Detection/Tracking | PP-YOLOE  | mAP: 56.3 <br> MOTA: 72.0 | Detection: 28ms <br>Tracking：33.1ms |[Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.pdparams) |[Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip) |
+| Calling Recognition | PP-HGNet | Precision Rate: 86.85 | Single Person 2.94ms | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_calling_halfbody.pdparams) | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_calling_halfbody.zip) |
+| Smoking Recognition | PP-YOLOE | mAP: 39.7 | Single Person 2.0ms | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/ppyoloe_crn_s_80e_smoking_visdrone.pdparams) | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/ppyoloe_crn_s_80e_smoking_visdrone.zip) |
+| Keypoint Detection            | HRNet     | AP: 87.1                  | Single Person 2.9ms                 |[Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/dark_hrnet_w32_256x192.pdparams) |[Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/dark_hrnet_w32_256x192.zip)     |
+| Falling Recognition            | ST-GCN    | Precision Rate: 96.43     | Single Person 2.7ms                 | - |[Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/STGCN.zip)                      |
+| Fighting Recognition | PP-TSM | Precision Rate: 89.06% | 128ms for a 2sec video | [Link](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams) | [Link](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.zip) |
 
-应用行为：摔倒识别
+Note:
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/205582385-08a1b6ae-9b1b-465a-ac25-d6427571eb56.gif" width='600'/><br>
-  <center>数据来源及版权归属：天覆科技，感谢提供并开源实际场景数据，仅限学术研究使用</center>
+1. The precision of the pedestrian detection/ tracking model is obtained by trainning and testing on [MOT17](https://motchallenge.net/), [CrowdHuman](http://www.crowdhuman.org/), [HIEVE](http://humaninevents.org/) and some business data.
+
+2. The keypoint detection model is trained on [COCO](https://cocodataset.org/), [UAV-Human](https://github.com/SUTDCV/UAV-Human), and some business data, and the precision is obtained on test sets of business data.
+
+3. The falling action recognition model is trained on [NTU-RGB+D](https://rose1.ntu.edu.sg/dataset/actionRecognition/), [UR Fall Detection Dataset](http://fenix.univ.rzeszow.pl/~mkepski/ds/uf.html), and some business data, and the precision is obtained on the testing set of business data.
+
+4. The calling action recognition model is trained and tested on [UAV-Human](https://github.com/SUTDCV/UAV-Human), by using video frames of calling in this dataset.
+
+5. The smoking action recognition model is trained and tested on business data.
+
+6. The fighting action recognition model is trained and tested on 6 public datasets, including Surveillance Camera Fight Dataset, A Dataset for Automatic Violence Detection in Videos, Hockey Fight Detection Dataset, Video Fight Detection Dataset, Real Life Violence Situations Dataset, UBI Abnormal Event Detection Dataset.
+
+7. The inference speed is the speed of using TensorRT FP16 on NVIDIA T4, including the total time of data pre-training, model inference, and post-processing.
+
+
+## Skeleton-based action recognition -- falling detection
+
+<div align="center">  <img src="https://user-images.githubusercontent.com/22989727/205582385-08a1b6ae-9b1b-465a-ac25-d6427571eb56.gif" width='600'/><br> <center>Data source and copyright owner：Skyinfor
+Technology. Thanks for the provision of actual scenario data, which are only
+used for academic research here. </center>
+
 </div>
 
-### 模型库
+### Description of Configuration
 
-基于骨骼点的行为识别包含行人检测/跟踪，关键点检测和摔倒行为识别三个模型，首先需要下载以下预训练模型
+Parameters related to action recognition in the [config file](../../config/infer_cfg_pphuman.yml) are as follow:
 
-| 任务 | 算法 | 精度 | 预测速度(ms) | 模型权重 | 预测部署模型 |
-|:---------------------|:---------:|:------:|:------:| :------: |:---------------------------------------------------------------------------------: |
-| 行人检测/跟踪 |  PP-YOLOE | mAP: 56.3 <br> MOTA: 72.0 | 检测: 16.2ms <br> 跟踪：22.3ms |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.pdparams) |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip) |
-| 关键点识别 | HRNet | AP: 87.1 | 单人 2.9ms |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/dark_hrnet_w32_256x192.pdparams) |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/dark_hrnet_w32_256x192.zip)|
-| 摔倒行为识别 |  ST-GCN  | 准确率: 96.43 | 单人 2.7ms | - |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/STGCN.zip) |
-
-注：
-1. 检测/跟踪模型精度为[MOT17](https://motchallenge.net/)，[CrowdHuman](http://www.crowdhuman.org/)，[HIEVE](http://humaninevents.org/)和部分业务数据融合训练测试得到。
-2. 关键点模型使用[COCO](https://cocodataset.org/)，[UAV-Human](https://github.com/SUTDCV/UAV-Human)和部分业务数据融合训练, 精度在业务数据测试集上得到。
-3. 摔倒行为识别模型使用[NTU-RGB+D](https://rose1.ntu.edu.sg/dataset/actionRecognition/)，[UR Fall Detection Dataset](http://fenix.univ.rzeszow.pl/~mkepski/ds/uf.html)和部分业务数据融合训练，精度在业务数据测试集上得到。
-4. 预测速度为NVIDIA T4 机器上使用TensorRT FP16时的速度, 速度包含数据预处理、模型预测、后处理全流程。
-
-### 配置说明
-[配置文件](../../config/infer_cfg_pphuman.yml)中与行为识别相关的参数如下：
 ```
-SKELETON_ACTION: # 基于骨骼点的行为识别模型配置
-  model_dir: output_inference/STGCN  # 模型所在路径
-  batch_size: 1 # 预测批大小。 当前仅支持为1进行推理
-  max_frames: 50 # 动作片段对应的帧数。在行人ID对应时序骨骼点结果时达到该帧数后，会通过行为识别模型判断该段序列的动作类型。与训练设置一致时效果最佳。
-  display_frames: 80 # 显示帧数。当预测结果为摔倒时，在对应人物ID中显示状态的持续时间。
-  coord_size: [384, 512] # 坐标统一缩放到的尺度大小。与训练设置一致时效果最佳。
-  enable: False # 是否开启该功能
+SKELETON_ACTION: # Config for skeleton-based action recognition model
+    model_dir: output_inference/STGCN  # Path of the model
+    batch_size: 1 # The size of the inference batch. Current now only support 1.
+    max_frames: 50 # The number of frames of action segments. When frames of time-ordered skeleton keypoints of each pedestrian ID achieve the max value,the action type will be judged by the action recognition model. If the setting is the same as the training, there will be an ideal inference result.
+    display_frames: 80 # The number of display frames. When the inferred action type is falling down, the time length of the act will be displayed in the ID.
+    coord_size: [384, 512] # The unified size of the coordinate, which is the best when it is the same as the training setting.
+    enable: False # Whether to enable this function
 ```
 
-### 使用方法
-1. 从`模型库`中下载`行人检测/跟踪`、`关键点识别`、`摔倒行为识别`三个预测部署模型并解压到```./output_inference```路径下;默认自动下载模型，如果手动下载，需要修改模型文件夹为模型存放路径。
-2. 目前行为识别模块仅支持视频输入，根据期望开启的行为识别方案类型，设置infer_cfg_pphuman.yml中`SKELETON_ACTION`的enable: True, 然后启动命令如下：
+
+## How to Use
+
+1. Download models `Pedestrian Detection/Tracking`, `Keypoint Detection` and `Falling Recognition` from the links in the Model Zoo and unzip them to ```./output_inference```. The models are automatically downloaded by default. If you download them manually, you need to modify the `model_dir` as the model storage path.
+
+2. Now the only available input is the video input in the action recognition module. set the "enable: True" of `SKELETON_ACTION` in infer_cfg_pphuman.yml. And then run the command:
+
     ```bash
     python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
-                                                   --video_file=test_video.mp4 \
-                                                   --device=gpu \
+                                                     --video_file=test_video.mp4 \
+                                                     --device=gpu
     ```
 
-3. 若修改模型路径，有以下两种方式：
+3. There are two ways to modify the model path:
 
-    - ```./deploy/pipeline/config/infer_cfg_pphuman.yml```下可以配置不同模型路径，关键点模型和摔倒行为识别模型分别对应`KPT`和`SKELETON_ACTION`字段，修改对应字段下的路径为实际期望的路径即可。
-    - 命令行中--config后面紧跟着增加`-o KPT.model_dir=xxx SKELETON_ACTION.model_dir=xxx `修改模型路径：
+  - In ```./deploy/pipeline/config/infer_cfg_pphuman.yml```, you can configurate different model paths，which is proper only if you match keypoint models and action recognition models with the fields of `KPT` and `SKELETON_ACTION` respectively, and modify the corresponding path of each field into the expected path.
+  - Add `-o KPT.model_dir=xxx SKELETON_ACTION.model_dir=xxx ` in the command line following the --config to change the model path：
+
+
     ```bash
     python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
                                                    -o KPT.model_dir=./dark_hrnet_w32_256x192 SKELETON_ACTION.model_dir=./STGCN \
                                                    --video_file=test_video.mp4 \
                                                    --device=gpu
     ```
+4. For detailed parameter description, please refer to [Parameter Description](./PPHuman_QUICK_STARTED.md)
 
-4. 启动命令中的完整参数说明，请参考[参数说明](./PPHuman_QUICK_STARTED.md)。
+### Introduction to the Solution
 
+1. Get the pedestrian detection box and the tracking ID number of the video input through object detection and multi-object tracking. The adopted model is PP-YOLOE, and for details, please refer to [PP-YOLOE](../../../../configs/ppyoloe).
 
-### 方案说明
-1. 使用多目标跟踪获取视频输入中的行人检测框及跟踪ID序号，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../../configs/ppyoloe/README_cn.md)，跟踪方案为OC-SORT，详细文档参考[OC-SORT](../../../../configs/mot/ocsort)。
-2. 通过行人检测框的坐标在输入视频的对应帧中截取每个行人。
-3. 使用[关键点识别模型](../../../../configs/keypoint/hrnet/dark_hrnet_w32_256x192.yml)得到对应的17个骨骼特征点。骨骼特征点的顺序及类型与COCO一致，详见[如何准备关键点数据集](../../../../docs/tutorials/data/PrepareKeypointDataSet.md)中的`COCO数据集`部分。
-4. 每个跟踪ID对应的目标行人各自累计骨骼特征点结果，组成该人物的时序关键点序列。当累计到预定帧数或跟踪丢失后，使用行为识别模型判断时序关键点序列的动作类型。当前版本模型支持摔倒行为的识别，预测得到的`class id`对应关系为：
+2. Capture every pedestrian in frames of the input video accordingly by using the coordinate of the detection box.
+3. In this strategy, we use the [keypoint detection model](../../../../configs/keypoint/hrnet/dark_hrnet_w32_256x192.yml) to obtain 17 skeleton keypoints. Their sequences and types are identical to those of COCO. For details, please refer to the `COCO dataset` part of [how to prepare keypoint datasets](../../../../docs/tutorials/data/PrepareKeypointDataSet_en.md).
+
+4. Each target pedestrian with a tracking ID has their own accumulation of skeleton keypoints, which is used to form a keypoint sequence in time order. When the number of accumulated frames reach a preset threshold or the tracking is lost, the action recognition model will be applied to judging the action type of the time-ordered keypoint sequence. The current model only supports the recognition of the act of falling down, and the relationship between the action type and `class id` is：
+
 ```
-0: 摔倒，
-1: 其他
+0: Fall down
+
+1: Others
 ```
-- 摔倒行为识别模型使用了[ST-GCN](https://arxiv.org/abs/1801.07455)，并基于[PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md)套件完成模型训练。
+- The falling action recognition model uses [ST-GCN](https://arxiv.org/abs/1801.07455), and employ the [PaddleVideo](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/stgcn.md) toolkit to complete model training.
 
-## 基于图像分类的行为识别
+## Image-Classification-Based Action Recognition -- Calling Recognition
 
-应用行为：打电话识别
+<div align="center">  <img src="https://user-images.githubusercontent.com/22989727/205596971-d92fd24e-977a-4742-91cc-ce5b4802473c.gif" width='600'/><br> <center>Data source and copyright owner：Skyinfor
+Technology. Thanks for the provision of actual scenario data, which are only
+used for academic research here. </center>
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/205596971-d92fd24e-977a-4742-91cc-ce5b4802473c.gif" width='600'/><br>
-  <center>数据来源及版权归属：天覆科技，感谢提供并开源实际场景数据，仅限学术研究使用</center>
 </div>
 
-### 模型库
+### Description of Configuration
 
-基于图像分类的行为识别包含行人检测/跟踪，打电话识别两个模型，首先需要下载以下预训练模型
+Parameters related to action recognition in the [config file](../../config/infer_cfg_pphuman.yml) are as follow:
 
-| 任务 | 算法 | 精度 | 预测速度(ms) | 模型权重 | 预测部署模型 |
-|:---------------------|:---------:|:------:|:------:| :------: |:---------------------------------------------------------------------------------: |
-| 行人检测/跟踪 |  PP-YOLOE | mAP: 56.3 <br> MOTA: 72.0 | 检测: 16.2ms <br> 跟踪：22.3ms |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.pdparams) |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip) |
-| 打电话识别 | PP-HGNet | 准确率: 86.85 | 单人 2.94ms | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_calling_halfbody.pdparams) | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/PPHGNet_tiny_calling_halfbody.zip) |
-
-
-注：
-1. 检测/跟踪模型精度为[MOT17](https://motchallenge.net/)，[CrowdHuman](http://www.crowdhuman.org/)，[HIEVE](http://humaninevents.org/)和部分业务数据融合训练测试得到。
-2. 打电话行为识别模型使用[UAV-Human](https://github.com/SUTDCV/UAV-Human)的打电话行为部分进行训练和测试。
-3. 预测速度为NVIDIA T4 机器上使用TensorRT FP16时的速度, 速度包含数据预处理、模型预测、后处理全流程。
-
-### 配置说明
-[配置文件](../../config/infer_cfg_pphuman.yml)中相关的参数如下：
 ```
-ID_BASED_CLSACTION: # 基于分类的行为识别模型配置
-  model_dir: output_inference/PPHGNet_tiny_calling_halfbody # 模型所在路径
-  batch_size: 8 # 预测批大小
-  threshold: 0.45 #识别为对应行为的阈值
-  display_frames: 80 # 显示帧数。当识别到对应动作时，在对应人物ID中显示状态的持续时间。
-  enable: False # 是否开启该功能
+ID_BASED_CLSACTION: # config for classfication-based action recognition model
+    model_dir: output_inference/PPHGNet_tiny_calling_halfbody  # Path of the model
+    batch_size: 8 # The size of the inference batch
+    threshold: 0.45 # Threshold for corresponding behavior
+    display_frames: 80 # The number of display frames. When the corresponding action is detected, the time length of the act will be displayed in the ID.
+    enable: False # Whether to enable this function
 ```
 
-### 使用方法
-1. 从`模型库`中下载`行人检测/跟踪`、`打电话行为识别`两个预测部署模型并解压到`./output_inference`路径下；默认自动下载模型，如果手动下载，需要修改模型文件夹为模型存放路径。
-2. 修改配置文件`deploy/pipeline/config/infer_cfg_pphuman.yml`中`ID_BASED_CLSACTION`下的`enable`为`True`；
-3. 仅支持输入视频，启动命令如下：
+### How to Use
+
+1. Download models `Pedestrian Detection/Tracking` and `Calling Recognition` from the links in `Model Zoo` and unzip them to ```./output_inference```. The models are automatically downloaded by default. If you download them manually, you need to modify the `model_dir` as the model storage path.
+
+2. Now the only available input is the video input in the action recognition module. Set the "enable: True" of `ID_BASED_CLSACTION` in infer_cfg_pphuman.yml.
+
+3. Run this command:
+  ```python
+  python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
+                                                     --video_file=test_video.mp4 \
+                                                     --device=gpu
+  ```
+4. For detailed parameter description, please refer to [Parameter Description](./PPHuman_QUICK_STARTED.md)
+
+### Introduction to the Solution
+1. Get the pedestrian detection box and the tracking ID number of the video input through object detection and multi-object tracking. The adopted model is PP-YOLOE, and for details, please refer to [PP-YOLOE](../../../configs/ppyoloe).
+
+2. Capture every pedestrian in frames of the input video accordingly by using the coordinate of the detection box.
+3. With image classification through pedestrian images at the frame level, when the category to which the image belongs is the corresponding behavior, it is considered that the character is in the behavior state for a certain period of time. This task is implemented with [PP-HGNet](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/zh_CN/models/PP-HGNet.md). In current version, the behavior of calling is supported and the relationship between the action type and `class id` is:
 ```
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
-                                                   --video_file=test_video.mp4 \
-                                                   --device=gpu
+0: Calling
+
+1: Others
 ```
-4. 启动命令中的完整参数说明，请参考[参数说明](./PPHuman_QUICK_STARTED.md)。
-
-### 方案说明
-1. 使用目标检测与多目标跟踪获取视频输入中的行人检测框及跟踪ID序号，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../../configs/ppyoloe/README_cn.md)，跟踪方案为OC-SORT，详细文档参考[OC-SORT](../../../../configs/mot/ocsort)。
-2. 通过行人检测框的坐标在输入视频的对应帧中截取每个行人。
-3. 通过在帧级别的行人图像通过图像分类的方式实现。当图片所属类别为对应行为时，即认为在一定时间段内该人物处于该行为状态中。该任务使用[PP-HGNet](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/zh_CN/models/PP-HGNet.md)实现，当前版本模型支持打电话行为的识别，预测得到的`class id`对应关系为：
-```
-0: 打电话，
-1: 其他
-```
-- 基于分类的行为识别基于[PaddleClas](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/zh_CN/models/PP-HGNet.md#3.3)完成模型训练。
 
 
-## 基于检测的行为识别
+## Detection-based Action Recognition -- Smoking Detection
 
-应用行为：吸烟识别
+<div align="center">  <img src="https://user-images.githubusercontent.com/22989727/205599300-380c3805-63d6-43cc-9b77-2687b1328d7b.gif" width='600'/><br> <center>Data source and copyright owner：Skyinfor
+Technology. Thanks for the provision of actual scenario data, which are only
+used for academic research here. </center>
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/205599300-380c3805-63d6-43cc-9b77-2687b1328d7b.gif" width='600'/><br>
-  <center>数据来源及版权归属：天覆科技，感谢提供并开源实际场景数据，仅限学术研究使用</center>
 </div>
 
-### 模型库
-在这里，我们提供了行人检测/跟踪、吸烟行为识别的预训练模型，用户可以直接下载使用。
+### Description of Configuration
 
-| 任务 | 算法 | 精度 | 预测速度(ms) | 模型权重 | 预测部署模型 |
-|:---------------------|:---------:|:------:|:------:| :------: |:---------------------------------------------------------------------------------: |
-| 行人检测/跟踪 |  PP-YOLOE | mAP: 56.3 <br> MOTA: 72.0 | 检测: 16.2ms <br> 跟踪：22.3ms |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.pdparams) |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_pipeline.zip) |
-| 吸烟行为识别 | PP-YOLOE | mAP: 39.7 | 单人 2.0ms | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/ppyoloe_crn_s_80e_smoking_visdrone.pdparams) | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/ppyoloe_crn_s_80e_smoking_visdrone.zip) |
-
-注：
-1. 检测/跟踪模型精度为[MOT17](https://motchallenge.net/)，[CrowdHuman](http://www.crowdhuman.org/)，[HIEVE](http://humaninevents.org/)和部分业务数据融合训练测试得到。
-2. 抽烟行为识别模型使用业务数据进行训练和测试。
-3. 预测速度为NVIDIA T4 机器上使用TensorRT FP16时的速度, 速度包含数据预处理、模型预测、后处理全流程。
-
-### 配置说明
-[配置文件](../../config/infer_cfg_pphuman.yml)中相关的参数如下：
+Parameters related to action recognition in the [config file](../../config/infer_cfg_pphuman.yml) are as follow:
 ```
-ID_BASED_DETACTION: # 基于检测的行为识别模型配置
-  model_dir: output_inference/ppyoloe_crn_s_80e_smoking_visdrone # 模型所在路径
-  batch_size: 8  # 预测批大小
-  threshold: 0.4  # 识别为对应行为的阈值
-  display_frames: 80 # 显示帧数。当识别到对应动作时，在对应人物ID中显示状态的持续时间。
-  enable: False # 是否开启该功能
+ID_BASED_DETACTION: # Config for detection-based action recognition model
+    model_dir: output_inference/ppyoloe_crn_s_80e_smoking_visdrone # Path of the model
+    batch_size: 8  # The size of the inference batch
+    threshold: 0.4  # Threshold for corresponding behavior.
+    display_frames: 80 # The number of display frames. When the corresponding action is detected, the time length of the act will be displayed in the ID.
+    enable: False # Whether to enable this function
 ```
 
-### 使用方法
-1. 从`模型库`中下载`行人检测/跟踪`、`抽烟行为识别`两个预测部署模型并解压到`./output_inference`路径下；默认自动下载模型，如果手动下载，需要修改模型文件夹为模型存放路径。
-2. 修改配置文件`deploy/pipeline/config/infer_cfg_pphuman.yml`中`ID_BASED_DETACTION`下的`enable`为`True`；
-3. 仅支持输入视频，启动命令如下：
-```
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
-                                                   --video_file=test_video.mp4 \
-                                                   --device=gpu
-```
-4. 启动命令中的完整参数说明，请参考[参数说明](./PPHuman_QUICK_STARTED.md)。
+### How to Use
 
-### 方案说明
-1. 使用目标检测与多目标跟踪获取视频输入中的行人检测框及跟踪ID序号，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../../configs/ppyoloe/README_cn.md)，跟踪方案为OC-SORT，详细文档参考[OC-SORT](../../../../configs/mot/ocsort)。
-2. 通过行人检测框的坐标在输入视频的对应帧中截取每个行人。
-3. 通过在帧级别的行人图像中检测该行为的典型特定目标实现。当检测到特定目标(在这里即烟头）以后，即认为在一定时间段内该人物处于该行为状态中。该任务使用[PP-YOLOE](../../../../configs/ppyoloe/README_cn.md)实现，当前版本模型支持吸烟行为的识别，预测得到的`class id`对应关系为：
+1. Download models `Pedestrian Detection/Tracking` and `Smoking Recognition` from the links in `Model Zoo` and unzip them to ```./output_inference```. The models are automatically downloaded by default. If you download them manually, you need to modify the `model_dir` as the model storage path.
+
+2. Now the only available input is the video input in the action recognition module. set the "enable: True" of `ID_BASED_DETACTION` in infer_cfg_pphuman.yml.
+
+3. Run this command:
+  ```bash
+  python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
+                                                     --video_file=test_video.mp4 \
+                                                     --device=gpu
+  ```
+4. For detailed parameter description, please refer to [Parameter Description](./PPHuman_QUICK_STARTED.md)
+
+### Introduction to the Solution
+1. Get the pedestrian detection box and the tracking ID number of the video input through object detection and multi-object tracking. The adopted model is PP-YOLOE, and for details, please refer to [PP-YOLOE](../../../../configs/ppyoloe).
+
+2. Capture every pedestrian in frames of the input video accordingly by using the coordinate of the detection box.
+
+3. We detecting the typical specific target of this behavior in frame-level pedestrian images. When a specific target (in this case, cigarette is the target) is detected, it is considered that the character is in the behavior state for a certain period of time. This task is implemented by [PP-YOLOE](../../../../configs/ppyoloe/). In current version, the behavior of smoking is supported and the relationship between the action type and `class id` is:
+
 ```
-0: 吸烟，
-1: 其他
+0: Smoking
+
+1: Others
 ```
 
-## 基于行人轨迹的行为识别
+## Video-Classification-Based Action Recognition -- Fighting Detection
+With wider and wider deployment of surveillance cameras, it is time-consuming and labor-intensive and inefficient to manually check whether there are abnormal behaviors such as fighting. AI + security assistant smart security. A fight recognition module is integrated into PP-Human to identify whether there is fighting in the video. We provide pre-trained models that users can download and use directly.
 
-应用行为：闯入识别
+| Task | Model | Acc. | Speed(ms) | Weight | Deploy Model |
+| ---- | ---- | ---------- | ---- | ---- | ---------- |
+|  Fighting Detection | PP-TSM | 89.06% | 128ms for a 2-sec video| [Link](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams) | [Link](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.zip) |
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/178769370-03ab1965-cfd1-401b-9902-82620a06e43c.gif" width='600'/>
+
+The model is trained with 6 public dataset, including Surveillance Camera Fight Dataset、A Dataset for Automatic Violence Detection in Videos、Hockey Fight Detection Dataset、Video Fight Detection Dataset、Real Life Violence Situations Dataset、UBI Abnormal Event Detection Dataset.
+
+This project focuses on is the identification of fighting behavior under surveillance cameras. Fighting behavior involves multiple people, and the skeleton-based technology is more suitable for single-person behavior recognition. In addition, fighting behavior is strongly dependent on timing information, and the detection and classification-based scheme is not suitable. Due to the complex background of the monitoring scene, the density of people, light, filming angle may affect the accuracy. This solution uses video-classification-based method to determine whether there is fighting in the video.
+For the case where the camera is far away from the person, it is optimized by increasing the resolution of the input image. Due to the limited training data, data augmentation is used to improve the generalization performance of the model.
+
+
+### Description of Configuration
+
+Parameters related to action recognition in the [config file](../../config/infer_cfg_pphuman.yml) are as follow:
+```
+VIDEO_ACTION:  # Config for detection-based action recognition model
+    model_dir: output_inference/ppTSM  # Path of the model
+    batch_size: 1 # The size of the inference batch. Current now only support 1.
+    frame_len: 8 # Accumulate the number of sampling frames. Inference will be executed when sampled frames reached this value.
+    sample_freq: 7 # Sampling frequency. It means how many frames to sample one frame.
+    short_size: 340 # The shortest length for video frame scaling transforms.
+    target_size: 320 # Target size for input video
+    enable: False # Whether to enable this function
+```
+
+### How to Use
+
+1. Download model `Fighting Detection` from the links of the above table and unzip it to ```./output_inference```. The models are automatically downloaded by default. If you download them manually, you need to modify the `model_dir` as the model storage path.
+
+2. Modify the file names in the `ppTSM` folder  to `model.pdiparams, model.pdiparams.info and model.pdmodel`;
+
+3. Now the only available input is the video input in the action recognition module. set the "enable: True" of `VIDEO_ACTION` in infer_cfg_pphuman.yml.
+
+4. Run this command:
+  ```bash
+  python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
+                                                     --video_file=test_video.mp4 \
+                                                     --device=gpu
+  ```
+5. For detailed parameter description, please refer to [Parameter Description](./PPHuman_QUICK_STARTED.md).
+
+
+The result is shown as follow:
+
+<div width="600" align="center">
+  <img src="https://user-images.githubusercontent.com/22989727/205597198-8b4333b3-6c39-472c-a25c-018dac908867.gif"/>
 </div>
 
-具体使用请参照[PP-Human检测跟踪模块](pphuman_mot.md)的`5. 区域闯入判断和计数`。
+Data source and copyright owner: Surveillance Camera Fight Dataset.
 
-### 方案说明
-1. 使用多目标跟踪获取视频输入中的行人检测框及跟踪ID序号，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../../configs/ppyoloe/README_cn.md)，跟踪方案为OC-SORT，详细文档参考[OC-SORT](../../../../configs/mot/ocsort)。
-2. 通过行人检测框的下边界中点在相邻帧位于用户所选区域的内外位置，来识别是否闯入所选区域。
-
-
-## 基于视频分类的行为识别
-
-应用行为：打架识别
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/22989727/205597198-8b4333b3-6c39-472c-a25c-018dac908867.gif" width='600'/><br>
-  <center>数据来源及版权归属：Surveillance Camera Fight Dataset。</center>
-</div>
-
-该方案关注的场景为监控摄像头下的打架行为识别。打架行为涉及多人，基于骨骼点技术的方案更适用于单人的行为识别。此外，打架行为对时序信息依赖较强，基于检测和分类的方案也不太适用。由于监控场景背景复杂，人的密集程度、光线、拍摄角度等都会对识别造成影响，本方案采用基于视频分类的方式判断视频中是否存在打架行为。针对摄像头距离人较远的情况，通过增大输入图像分辨率优化。由于训练数据有限，采用数据增强的方式提升模型的泛化性能。
-
-### 模型库
-在这里，我们提供了打架识别的预训练模型，用户可以直接下载使用。
-
-| 任务 | 算法 | 精度 | 预测速度(ms) | 模型权重 | 预测部署模型 |
-|:---------------------|:---------:|:------:|:------:| :------: |:---------------------------------------------------------------------------------: |
-| 打架识别 | PP-TSM | 准确率：89.06% | 2s视频 128ms | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.pdparams) | [下载链接](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM_fight.zip) |
-
-注：
-1. 打架识别模型基于6个公开数据集训练得到：Surveillance Camera Fight Dataset、A Dataset for Automatic Violence Detection in Videos、Hockey Fight Detection Dataset、Video Fight Detection Dataset、Real Life Violence Situations Dataset、UBI Abnormal Event Detection Dataset。
-2. 预测速度为NVIDIA T4 机器上使用TensorRT FP16时的速度, 速度包含数据预处理、模型预测、后处理全流程。
+### Introduction to the Solution
+The current fight recognition model is using [PP-TSM](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/pp-tsm.md), and adaptated to complete the model training. For the input video or video stream, we extraction frame at a certain interval. When the video frame accumulates to the specified number, it is input into the video classification model to determine whether there is fighting.
 
 
-### 配置说明
-[配置文件](../../config/infer_cfg_pphuman.yml)中与行为识别相关的参数如下：
-```
-VIDEO_ACTION:  # 基于视频分类的行为识别模型配置
-  model_dir: output_inference/ppTSM # 模型所在路径
-  batch_size: 1 # 预测批大小。当前仅支持为1进行推理
-  frame_len: 8 # 累计抽样帧数量，达到该数量后执行一次识别
-  sample_freq: 7 # 抽样频率，即间隔多少帧抽样一帧
-  short_size: 340 # 视频帧尺度变换最小边的长度
-  target_size: 320 # 目标视频帧的大小
-  enable: False # 是否开启该功能
-```
+## Custom Training
 
-### 使用方法
-1. 从上表链接中下载`打架识别`任务的预测部署模型并解压到`./output_inference`路径下；默认自动下载模型，如果手动下载，需要修改模型文件夹为模型存放路径。
-2. 修改配置文件`deploy/pphuman/config/infer_cfg_pphuman.yml`中`VIDEO_ACTION`下的`enable`为`True`；
-3. 仅支持输入视频，启动命令如下：
-```
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pphuman.yml \
-                                                   --video_file=test_video.mp4 \
-                                                   --device=gpu
-```
-4. 启动命令中的完整参数说明，请参考[参数说明](./PPHuman_QUICK_STARTED.md)。
+The pretrained models are provided and can be used directly, including pedestrian detection/ tracking, keypoint detection, smoking, calling and fighting recognition. If users need to train custom action or optimize the model performance, please refer the link below.
+
+| Task | Model | Development Document |
+| ---- | ---- | -------- |
+| pedestrian detection/tracking | PP-YOLOE | [doc](../../../../configs/ppyoloe/README.md#getting-start) |
+| keypoint detection | HRNet | [doc](../../../../configs/keypoint/README_en.md#3training-and-testing) |
+| action recognition (fall down) |  ST-GCN  | [doc](../../../../docs/advanced_tutorials/customization/action_recognotion/skeletonbased_rec.md) |
+| action recognition (smoking) |  PP-YOLOE  | [doc](../../../../docs/advanced_tutorials/customization/action_recognotion/idbased_det.md) |
+| action recognition (calling) |  PP-HGNet  | [doc](../../../../docs/advanced_tutorials/customization/action_recognotion/idbased_clas.md) |
+| action recognition (fighting) |  PP-TSM  | [doc](../../../../docs/advanced_tutorials/customization/action_recognotion/videobased_rec.md) |
 
 
-### 方案说明
+## Reference
 
-目前打架识别模型使用的是[PP-TSM](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/model_zoo/recognition/pp-tsm.md)，并在PP-TSM视频分类模型训练流程的基础上修改适配，完成模型训练。对于输入的视频或者视频流，进行等间隔抽帧，当视频帧累计到指定数目时，输入到视频分类模型中判断是否存在打架行为。
-
-
-## 参考文献
 ```
 @inproceedings{stgcn2018aaai,
   title     = {Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition},
@@ -269,4 +272,4 @@ python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_pph
   booktitle = {AAAI},
   year      = {2018},
 }
-`````
+```

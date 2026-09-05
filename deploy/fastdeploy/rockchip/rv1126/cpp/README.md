@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection 量化模型 RV1126 C++ 部署示例
 
 本目录下提供的 `infer.cc`，可以帮助用户快速完成 PP-YOLOE 量化模型在 RV1126 上的部署推理加速。

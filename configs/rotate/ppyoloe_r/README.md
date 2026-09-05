@@ -1,33 +1,31 @@
-简体中文 | [English](README_en.md)
 
 # PP-YOLOE-R
 
-## 内容
-- [简介](#简介)
-- [模型库](#模型库)
-- [使用说明](#使用说明)
-- [预测部署](#预测部署)
-- [附录](#附录)
-- [引用](#引用)
+## Content
+- [Introduction](#Introduction)
+- [Model Zoo](#Model-Zoo)
+- [Getting Start](#Getting-Start)
+- [Deployment](#Deployment)
+- [Appendix](#Appendix)
+- [Citations](#Citations)
 
-## 简介
-PP-YOLOE-R是一个高效的单阶段Anchor-free旋转框检测模型。基于PP-YOLOE, PP-YOLOE-R以极少的参数量和计算量为代价，引入了一系列有用的设计来提升检测精度。在DOTA 1.0数据集上，PP-YOLOE-R-l和PP-YOLOE-R-x在单尺度训练和测试的情况下分别达到了78.14和78.27 mAP，这超越了几乎所有的旋转框检测模型。通过多尺度训练和测试，PP-YOLOE-R-l和PP-YOLOE-R-x的检测精度进一步提升至80.02和80.73 mAP。在这种情况下，PP-YOLOE-R-x超越了所有的anchor-free方法并且和最先进的anchor-based的两阶段模型精度几乎相当。此外，PP-YOLOE-R-s和PP-YOLOE-R-m通过多尺度训练和测试可以达到79.42和79.71 mAP。考虑到这两个模型的参数量和计算量，其性能也非常卓越。在保持高精度的同时，PP-YOLOE-R避免使用特殊的算子，例如Deformable Convolution或Rotated RoI Align，以使其能轻松地部署在多种多样的硬件上。在1024x1024的输入分辨率下，PP-YOLOE-R-s/m/l/x在RTX 2080 Ti上使用TensorRT FP16分别能达到69.8/55.1/48.3/37.1 FPS，在Tesla V100上分别能达到114.5/86.8/69.7/50.7 FPS。更多细节可以参考我们的[**技术报告**](https://arxiv.org/abs/2211.02386)。
+## Introduction
+PP-YOLOE-R is an efficient anchor-free rotated object detector. Based on PP-YOLOE, PP-YOLOE-R introduces a bag of useful tricks to improve detection precision at the expense of marginal parameters and computations.PP-YOLOE-R-l and PP-YOLOE-R-x achieve 78.14 and 78.27 mAP respectively on DOTA 1.0 dataset with single-scale training and testing, which outperform almost all other rotated object detectors. With multi-scale training and testing, the detection precision of PP-YOLOE-R-l and PP-YOLOE-R-x is further improved to 80.02 and 80.73 mAP. In this case, PP-YOLOE-R-x surpasses all anchor-free methods and demonstrates competitive performance to state-of-the-art anchor-based two-stage model. Moreover, PP-YOLOE-R-s and PP-YOLOE-R-m can achieve 79.42 and 79.71 mAP with multi-scale training and testing, which is an excellent result considering the parameters and GLOPS of these two models. While maintaining high precision, PP-YOLOE-R avoids using special operators, such as Deformable Convolution or Rotated RoI Align, to be deployed friendly on various hardware. At the input resolution of 1024$\times$1024, PP-YOLOE-R-s/m/l/x can reach 69.8/55.1/48.3/37.1 FPS on RTX 2080 Ti and 114.5/86.8/69.7/50.7 FPS on Tesla V100 GPU with TensorRT and FP16-precision. For more details, please refer to our [**technical report**](https://arxiv.org/abs/2211.02386).
 
 <div align="center">
   <img src="../../../docs/images/ppyoloe_r_map_fps.png" width=500 />
 </div>
 
-PP-YOLOE-R相较于PP-YOLOE做了以下几点改动：
+Compared with PP-YOLOE, PP-YOLOE-R has made the following changes:
 - Rotated Task Alignment Learning
-- 解耦的角度预测头
-- 使用DFL进行角度预测
-- 可学习的门控单元
-- [ProbIoU损失函数](https://arxiv.org/abs/2106.06072)
+- Decoupled Angle Prediction Head
+- Angle Prediction with DFL
+- Learnable Gating Unit for RepVGG
+- [ProbIoU Loss](https://arxiv.org/abs/2106.06072)
 
-## 模型库
-
-| 模型 | Backbone | mAP | V100 TRT FP16 (FPS) | RTX 2080 Ti TRT FP16 (FPS) | Params (M) | FLOPs (G) | 学习率策略 | 角度表示 | 数据增广 | GPU数目 | 每GPU图片数目 | 模型下载 | 配置文件 |
-|:---:|:--------:|:----:|:--------------------:|:------------------------:|:----------:|:---------:|:--------:|:----------:|:-------:|:------:|:-----------:|:--------:|:------:|
+## Model Zoo
+| Model | Backbone | mAP  | V100 TRT FP16 (FPS) | RTX 2080 Ti TRT FP16 (FPS) | Params (M) | FLOPs (G) | Lr Scheduler | Angle | Aug | GPU Number | images/GPU | download | config |
+|:-----:|:--------:|:----:|:-------------------:|:--------------------------:|:-----------:|:---------:|:--------:|:-----:|:---:|:----------:|:----------:|:--------:|:------:|
 | PP-YOLOE-R-s | CRN-s | 73.82 | 114.5 | 69.8 | 8.09 | 43.46 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota.yml) |
 | PP-YOLOE-R-s | CRN-s | 79.42 | 114.5 | 69.8 | 8.09 | 43.46 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota_ms.yml) |
 | PP-YOLOE-R-m | CRN-m | 77.64 | 86.8  | 55.1 | 23.96 |127.00 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_m_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_m_3x_dota.yml) |
@@ -37,113 +35,117 @@ PP-YOLOE-R相较于PP-YOLOE做了以下几点改动：
 | PP-YOLOE-R-x | CRN-x | 78.28 | 50.7  | 37.1 | 100.27|529.82 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota.yml) |
 | PP-YOLOE-R-x | CRN-x | 80.73 | 50.7  | 37.1 | 100.27|529.82 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota_ms.yml) |
 
-**注意:**
+**Notes:**
 
-- 如果**GPU卡数**或者**batch size**发生了改变，你需要按照公式 **lr<sub>new</sub> = lr<sub>default</sub> * (batch_size<sub>new</sub> * GPU_number<sub>new</sub>) / (batch_size<sub>default</sub> * GPU_number<sub>default</sub>)** 调整学习率。
-- 模型库中的模型默认使用单尺度训练单尺度测试。如果数据增广一栏标明MS，意味着使用多尺度训练和多尺度测试。如果数据增广一栏标明RR，意味着使用RandomRotate数据增广进行训练。
-- CRN表示在PP-YOLOE中提出的CSPRepResNet
-- PP-YOLOE-R的参数量和计算量是在重参数化之后计算得到，输入图像的分辨率为1024x1024
-- 速度测试使用TensorRT 8.2.3在DOTA测试集中测试2000张图片计算平均值得到。参考速度测试以复现[速度测试](#速度测试)
+- if **GPU number** or **mini-batch size** is changed, **learning rate** should be adjusted according to the formula **lr<sub>new</sub> = lr<sub>default</sub> * (batch_size<sub>new</sub> * GPU_number<sub>new</sub>) / (batch_size<sub>default</sub> * GPU_number<sub>default</sub>)**.
+- Models in model zoo is trained and tested with single scale by default. If `MS` is indicated in the data augmentation column, it means that multi-scale training and multi-scale testing are used. If `RR` is indicated in the data augmentation column, it means that RandomRotate data augmentation is used for training.
+- CRN denotes CSPRepResNet proposed in PP-YOLOE
+- The parameters and GLOPs of PP-YOLOE-R are calculated after re-parameterization, and the resolution of the input image is 1024x1024
+- Speed ​​is calculated and averaged by testing 2000 images on the DOTA test dataset. Refer to [Speed testing](#Speed-testing) to reproduce the results.
 
-## 使用说明
+## Getting Start
 
-参考[数据准备](../README.md#数据准备)准备数据。
+Refer to [Data-Preparation](../README_en.md#Data-Preparation) to prepare data.
 
-### 训练
+### Training
 
-GPU单卡训练
+Single GPU Training
 ``` bash
 CUDA_VISIBLE_DEVICES=0 python tools/train.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml
 ```
 
-GPU多卡训练
+Multiple GPUs Training
 ``` bash
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml
 ```
 
-### 预测
+### Inference
 
-执行以下命令预测单张图片，图片预测结果会默认保存在`output`文件夹下面
+Run the follow command to infer single image, the result of inference will be saved in `output` directory by default.
+
 ``` bash
 python tools/infer.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams --infer_img=demo/P0861__1.0__1154___824.png --draw_threshold=0.5
 ```
 
-### DOTA数据集评估
-
-参考[DOTA Task](https://captain-whu.github.io/DOTA/tasks.html), 评估DOTA数据集需要生成一个包含所有检测结果的zip文件，每一类的检测结果储存在一个txt文件中，txt文件中每行格式为：`image_name score x1 y1 x2 y2 x3 y3 x4 y4`。将生成的zip文件提交到[DOTA Evaluation](https://captain-whu.github.io/DOTA/evaluation.html)的Task1进行评估。你可以执行以下命令得到test数据集的预测结果：
+### Evaluation on DOTA Dataset
+Refering to [DOTA Task](https://captain-whu.github.io/DOTA/tasks.html), You need to submit a zip file containing results for all test images for evaluation. The detection results of each category are stored in a txt file, each line of which is in the following format
+`image_id score x1 y1 x2 y2 x3 y3 x4 y4`. To evaluate, you should submit the generated zip file to the Task1 of [DOTA Evaluation](https://captain-whu.github.io/DOTA/evaluation.html). You can run the following command to get the inference results of test dataset:
 ``` bash
 python tools/infer.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams --infer_dir=/path/to/test/images --output_dir=output_ppyoloe_r --visualize=False --save_results=True
 ```
-将预测结果处理成官网评估所需要的格式：
+Process the prediction results into the format required for the official website evaluation:
 ``` bash
 python configs/rotate/tools/generate_result.py --pred_txt_dir=output_ppyoloe_r/ --output_dir=submit/ --data_type=dota10
 
 zip -r submit.zip submit
 ```
 
-### 速度测试
-可以使用Paddle模式或者Paddle-TRT模式进行测速。当使用Paddle-TRT模式测速时，需要确保**TensorRT版本大于8.2, PaddlePaddle版本为develop版本**。使用Paddle-TRT进行测速，可以执行以下命令：
+### Speed testing
+
+You can use Paddle mode or Paddle-TRT mode for speed testing. When using Paddle-TRT for speed testing, make sure that **the version of TensorRT is larger than 8.2 and the version of PaddlePaddle is the develop version**. Using Paddle-TRT to test speed, run following command
 
 ``` bash
-# 导出模型
+# export inference model
 python tools/export_model.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams trt=True
 
-# 速度测试
+# speed testing
 CUDA_VISIBLE_DEVICES=0 python configs/rotate/tools/inference_benchmark.py --model_dir output_inference/ppyoloe_r_crn_l_3x_dota/ --image_dir /path/to/dota/test/dir --run_mode trt_fp16
 ```
-当只使用Paddle进行测速，可以执行以下命令：
+Using Paddle to test speed, run following command
 ``` bash
-# 导出模型
+# export inference model
 python tools/export_model.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams
 
-# 速度测试
+# speed testing
 CUDA_VISIBLE_DEVICES=0 python configs/rotate/tools/inference_benchmark.py --model_dir output_inference/ppyoloe_r_crn_l_3x_dota/ --image_dir /path/to/dota/test/dir --run_mode paddle
+
 ```
 
-## 预测部署
+## Deployment
 
-**使用Paddle**进行部署，执行以下命令：
+**Using Paddle** to for deployment, run following command
+
 ``` bash
-# 导出模型
+# export inference model
 python tools/export_model.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams
 
-# 预测图片
+# inference single image
 python deploy/python/infer.py --image_file demo/P0072__1.0__0___0.png --model_dir=output_inference/ppyoloe_r_crn_l_3x_dota --run_mode=paddle --device=gpu
 ```
 
-**使用Paddle-TRT进行部署**，执行以下命令：
-```
-# 导出模型
+**Using Paddle-TRT** for deployment, run following command
+
+``` bash
+# export inference model
 python tools/export_model.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams trt=True
 
-# 预测图片
+# inference single image
 python deploy/python/infer.py --image_file demo/P0072__1.0__0___0.png --model_dir=output_inference/ppyoloe_r_crn_l_3x_dota --run_mode=trt_fp16 --device=gpu
 ```
+**Notes:**
+- When using Paddle-TRT for speed testing, make sure that **the version of TensorRT is larger than 8.2 and the version of PaddlePaddle is the develop version**
 
-**注意：**
-- 使用Paddle-TRT使用确保**PaddlePaddle版本为develop版本且TensorRT版本大于8.2**.
+**Using ONNX Runtime** for deployment, run following command
 
-**使用ONNX Runtime进行部署**，执行以下命令：
-```
-# 导出模型
+``` bash
+# export inference model
 python tools/export_model.py -c configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml -o weights=https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams export_onnx=True
 
-# 安装paddle2onnx
+# install paddle2onnx
 pip install paddle2onnx
 
-# 转换成onnx模型
+# convert to onnx model
 paddle2onnx --model_dir output_inference/ppyoloe_r_crn_l_3x_dota --model_filename model.pdmodel --params_filename model.pdiparams --opset_version 11 --save_file ppyoloe_r_crn_l_3x_dota.onnx
 
-# 预测图片
+# inference single image
 python configs/rotate/tools/onnx_infer.py --infer_cfg output_inference/ppyoloe_r_crn_l_3x_dota/infer_cfg.yml --onnx_file ppyoloe_r_crn_l_3x_dota.onnx --image_file demo/P0072__1.0__0___0.png
-
 ```
 
-## 附录
+## Appendix
 
-PP-YOLOE-R消融实验
+Ablation experiments of PP-YOLOE-R
 
-| 模型 | mAP | 参数量(M) | FLOPs(G) |
+| Model | mAP | Params(M) | FLOPs(G) |
 | :-: | :-: | :------: | :------: |
 | Baseline | 75.61 | 50.65 | 269.09 |
 | +Rotated Task Alignment Learning | 77.24 | 50.65 | 269.09 |
@@ -151,8 +153,7 @@ PP-YOLOE-R消融实验
 | +Angle Prediction with DFL | 78.01 | 53.29 | 281.65 |
 | +Learnable Gating Unit for RepVGG | 78.14 | 53.29 | 281.65 |
 
-
-## 引用
+## Citations
 
 ```
 @article{wang2022pp,

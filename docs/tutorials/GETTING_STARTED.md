@@ -1,4 +1,3 @@
-English | [简体中文](GETTING_STARTED_cn.md)
 
 # Getting Started
 

@@ -1,19 +1,20 @@
 # 1. TTFNet
 
-## 简介
+## Introduction
 
-TTFNet是一种用于实时目标检测且对训练时间友好的网络，对CenterNet收敛速度慢的问题进行改进，提出了利用高斯核生成训练样本的新方法，有效的消除了anchor-free head中存在的模糊性。同时简单轻量化的网络结构也易于进行任务扩展。
+TTFNet is a network used for real-time object detection and friendly to training time. It improves the slow convergence speed of CenterNet and proposes a new method to generate training samples using Gaussian kernel, which effectively eliminates the fuzziness existing in Anchor Free head. At the same time, the simple and lightweight network structure is also easy to expand the task.
 
-**特点:**
 
-结构简单，仅需要两个head检测目标位置和大小，并且去除了耗时的后处理操作
-训练时间短，基于DarkNet53的骨干网路，V100 8卡仅需要训练2个小时即可达到较好的模型效果
+**Characteristics:**
+
+The structure is simple, requiring only two heads to detect target position and size, and eliminating time-consuming post-processing operations
+The training time is short. Based on DarkNet53 backbone network, V100 8 cards only need 2 hours of training to achieve better model effect
 
 ## Model Zoo
 
-| 骨架网络        | 网络类型       | 每张GPU图片个数 | 学习率策略 |推理时间(fps) | Box AP |                           下载                          | 配置文件 |
-| :-------------- | :------------- | :-----: | :-----: | :------------: | :-----: | :-----------------------------------------------------: | :-----: |
-| DarkNet53    | TTFNet           |    12    |   1x      |     ----     |  33.5  | [下载链接](https://paddledet.bj.bcebos.com/models/ttfnet_darknet53_1x_coco.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/ttfnet_darknet53_1x_coco.yml) |
+| Backbone  | Network type | Number of images per GPU | Learning rate strategy | Inferring time(fps) | Box AP |                                     Download                                     |                                                       Configuration File                                                       |
+| :-------- | :----------- | :----------------------: | :--------------------: | :-----------------: | :----: | :------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------: |
+| DarkNet53 | TTFNet       |            12            |           1x           |        ----         |  33.5  | [link](https://paddledet.bj.bcebos.com/models/ttfnet_darknet53_1x_coco.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/ttfnet_darknet53_1x_coco.yml) |
 
 
 
@@ -21,39 +22,39 @@ TTFNet是一种用于实时目标检测且对训练时间友好的网络，对Ce
 
 # 2. PAFNet
 
-## 简介
+## Introduction
 
-PAFNet（Paddle Anchor Free）是PaddleDetection基于TTFNet的优化模型，精度达到anchor free领域SOTA水平，同时产出移动端轻量级模型PAFNet-Lite
+PAFNet (Paddle Anchor Free) is an optimized model of PaddleDetection based on TTF Net, whose accuracy reaches the SOTA level in the Anchor Free field, and meanwhile produces mobile lightweight model PAFNet-Lite
 
-PAFNet系列模型从如下方面优化TTFNet模型：
+PAFNet series models optimize TTFNet model from the following aspects:
 
 - [CutMix](https://arxiv.org/abs/1905.04899)
-- 更优的骨干网络: ResNet50vd-DCN
-- 更大的训练batch size: 8 GPUs，每GPU batch_size=18
+- Better backbone network: ResNet50vd-DCN
+- Larger training batch size: 8 GPUs, each GPU batch size=18
 - Synchronized Batch Normalization
 - [Deformable Convolution](https://arxiv.org/abs/1703.06211)
 - [Exponential Moving Average](https://www.investopedia.com/terms/e/ema.asp)
-- 更优的预训练模型
+- Better pretraining model
 
 
-## 模型库
+## Model library
 
-| 骨架网络        | 网络类型       | 每张GPU图片个数 | 学习率策略 |推理时间(fps) | Box AP |                           下载                          | 配置文件 |
-| :-------------- | :------------- | :-----: | :-----: | :------------: | :-----: | :-----------------------------------------------------: | :-----: |
-| ResNet50vd   | PAFNet           |    18    |   10x      |     ----     |  39.8  | [下载链接](https://paddledet.bj.bcebos.com/models/pafnet_10x_coco.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/pafnet_10x_coco.yml) |
+| Backbone   | Net type | Number of images per GPU | Learning rate strategy | Inferring time(fps) | Box AP |                                Download                                 |                                                  Configuration File                                                   |
+| :--------- | :------- | :----------------------: | :--------------------: | :-----------------: | :----: | :---------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: |
+| ResNet50vd | PAFNet   |            18            |          10x           |        ----         |  39.8  | [link](https://paddledet.bj.bcebos.com/models/pafnet_10x_coco.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/pafnet_10x_coco.yml) |
 
 
 
 ### PAFNet-Lite
 
-| 骨架网络        | 网络类型       | 每张GPU图片个数 | 学习率策略 | Box AP | 麒麟990延时（ms） | 体积（M）                          | 下载                          | 配置文件 |
-| :-------------- | :------------- | :-----: | :-----: | :-----: | :------------: | :-----: | :-----------------------------------------------------: | :-----: |
-| MobileNetv3   |  PAFNet-Lite          |    12    |   20x     |     23.9    |  26.00   | 14 | [下载链接](https://paddledet.bj.bcebos.com/models/pafnet_lite_mobilenet_v3_20x_coco.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/pafnet_lite_mobilenet_v3_20x_coco.yml) |
+| Backbone    | Net type    | Number of images per GPU | Learning rate strategy | Box AP | kirin 990 delay（ms） | volume（M） |                                         Download                                          |                                                           Configuration File                                                            |
+| :---------- | :---------- | :----------------------: | :--------------------: | :----: | :-------------------: | :---------: | :---------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------: |
+| MobileNetv3 | PAFNet-Lite |            12            |          20x           |  23.9  |         26.00         |     14      | [link](https://paddledet.bj.bcebos.com/models/pafnet_lite_mobilenet_v3_20x_coco.pdparams) | [Configuration File](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/ttfnet/pafnet_lite_mobilenet_v3_20x_coco.yml) |
 
-**注意：** 由于动态图框架整体升级，PAFNet的PaddleDetection发布的权重模型评估时需要添加--bias字段, 例如
+**Attention:** Due to the overall upgrade of the dynamic graph framework, the weighting model published by PaddleDetection of PAF Net needs to be evaluated with a --bias field, for example
 
 ```bash
-# 使用PaddleDetection发布的权重
+# Published weights using Paddle Detection
 CUDA_VISIBLE_DEVICES=0 python tools/eval.py -c configs/ppyolo/pafnet_10x_coco.yml -o weights=https://paddledet.bj.bcebos.com/models/pafnet_10x_coco.pdparams --bias
 ```
 

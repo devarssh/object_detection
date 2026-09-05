@@ -1,104 +1,106 @@
-简体中文 | [English](./idbased_clas_en.md)
 
-# 基于人体id的分类模型开发
+# Development for Action Recognition Based on Classification with Human ID
 
-## 环境准备
+## Environmental Preparation
+The model of action recognition based on classification with human id is trained with [PaddleClas](https://github.com/PaddlePaddle/PaddleClas). Please refer to [Install PaddleClas](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/en/installation/install_paddleclas_en.md) to complete the environment installation for subsequent model training and usage processes.
 
-基于人体id的分类方案是使用[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)的功能进行模型训练的。请按照[安装说明](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/zh_CN/installation/install_paddleclas.md)完成环境安装，以进行后续的模型训练及使用流程。
+## Data Preparation
 
-## 数据准备
+The model of action recognition based on classification with human id directly recognizes the image frames of video, so the model training process is same with the usual image classification model.
 
-基于图像分类的行为识别方案直接对视频中的图像帧结果进行识别，因此模型训练流程与通常的图像分类模型一致。
+### Dataset Download
 
-### 数据集下载
-打电话的行为识别是基于公开数据集[UAV-Human](https://github.com/SUTDCV/UAV-Human)进行训练的。请通过该链接填写相关数据集申请材料后获取下载链接。
+The action recognition of making phone calls is trained on the public dataset [UAV-Human](https://github.com/SUTDCV/UAV-Human). Please fill in the relevant application materials through this link to obtain the download link.
 
-在`UAVHuman/ActionRecognition/RGBVideos`路径下包含了该数据集中RGB视频数据集，每个视频的文件名即为其标注信息。
+The RGB video in this dataset is included in the `UAVHuman/ActionRecognition/RGBVideos` path, and the file name of each video is its annotation information.
 
-### 训练及测试图像处理
-根据视频文件名，其中与行为识别相关的为`A`相关的字段（即action），我们可以找到期望识别的动作类型数据。
-- 正样本视频：以打电话为例，我们只需找到包含`A024`的文件。
-- 负样本视频：除目标动作以外所有的视频。
+### Image Processing for Training and Validation
+According to the video file name, in which the `A` field (i.e. action) related to action recognition, we can find the action type of the video data that we expect to recognize.
+- Positive sample video: Taking phone calls as an example, we just need to find the file containing `A024`.
+- Negative sample video: All videos except the target action.
 
-鉴于视频数据转化为图像会有较多冗余，对于正样本视频，我们间隔8帧进行采样，并使用行人检测模型处理为半身图像（取检测框的上半部分，即`img = img[:H/2, :, :]`)。正样本视频中的采样得到的图像即视为正样本，负样本视频中采样得到的图像即为负样本。
+In view of the fact that there will be much redundancy when converting video data into images, for positive sample videos, we sample at intervals of 8 frames, and use the pedestrian detection model to process it into a half-body image (take the upper half of the detection frame, that is, `img = img[: H/2, :, :]`). The image sampled from the positive sample video is regarded as a positive sample, and the sampled image from the negative sample video is regarded as a negative sample.
 
-**注意**: 正样本视频中并不完全符合打电话这一动作，在视频开头结尾部分会出现部分冗余动作，需要移除。
+**Note**: The positive sample video does not completely are the action of making a phone call. There will be some redundant actions at the beginning and end of the video, which need to be removed.
 
-### 标注文件准备
 
-基于图像分类的行为识别方案是借助[PaddleClas](https://github.com/PaddlePaddle/PaddleClas)进行模型训练的。使用该方案训练的模型，需要准备期望识别的图像数据及对应标注文件。根据[PaddleClas数据集格式说明](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/zh_CN/data_preparation/classification_dataset.md#1-%E6%95%B0%E6%8D%AE%E9%9B%86%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E)准备对应的数据即可。标注文件样例如下，其中`0`,`1`分别是图片对应所属的类别：
+### Preparation for Annotation File
+The model of action recognition based on classification with human id is trained with [PaddleClas](https://github.com/PaddlePaddle/PaddleClas). Thus the model trained with this scheme needs to prepare the desired image data and corresponding annotation files. Please refer to [Image Classification Datasets](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/en/data_preparation/classification_dataset_en.md) to prepare the data. An example of an annotation file is as follows, where `0` and `1` are the corresponding categories of the image:
+
 ```
-    # 每一行采用"空格"分隔图像路径与标注
+    # Each line uses "space" to separate the image path and label
     train/000001.jpg 0
     train/000002.jpg 0
     train/000003.jpg 1
     ...
 ```
 
-此外，标签文件`phone_label_list.txt`，帮助将分类序号映射到具体的类型名称：
+Additionally, the label file `phone_label_list.txt` helps map category numbers to specific type names:
 ```
-0 make_a_phone_call  # 类型0
-1 normal             # 类型1
-```
-
-完成上述内容后，放置于`dataset`目录下，文件结构如下：
-```
-data/
-├── images  # 放置所有图片
-├── phone_label_list.txt # 标签文件
-├── phone_train_list.txt # 训练列表，包含图片及其对应类型
-└── phone_val_list.txt   # 测试列表，包含图片及其对应类型
+0 make_a_phone_call # type 0
+1 normal # type 1
 ```
 
-## 模型优化
-
-### 检测-跟踪模型优化
-基于分类的行为识别模型效果依赖于前序的检测和跟踪效果，如果实际场景中不能准确检测到行人位置，或是难以正确在不同帧之间正确分配人物ID，都会使行为识别部分表现受限。如果在实际使用中遇到了上述问题，请参考[目标检测任务二次开发](../detection.md)以及[多目标跟踪任务二次开发](../pphuman_mot.md)对检测/跟踪模型进行优化。
-
-
-### 半身图预测
-在打电话这一动作中，实际是通过上半身就能实现动作的区分的，因此在训练和预测过程中，将图像由行人全身图换为半身图
-
-## 新增行为
-
-### 数据准备
-参考前述介绍的内容，完成数据准备的部分，放置于`{root of PaddleClas}/dataset`下：
+After the above content finished, place it to the `dataset` directory, the file structure is as follow:
 ```
 data/
-├── images  # 放置所有图片
-├── label_list.txt # 标签文件
-├── train_list.txt # 训练列表，包含图片及其对应类型
-└── val_list.txt   # 测试列表，包含图片及其对应类型
+├── images  # All images
+├── phone_label_list.txt # Label file
+├── phone_train_list.txt # Training list, including pictures and their corresponding types
+└── phone_val_list.txt   # Validation list, including pictures and their corresponding types
 ```
-其中，训练及测试列表如下：
+
+## Model Optimization
+
+### Detection-Tracking Model Optimization
+The performance of action recognition based on classification with human id depends on the pre-order detection and tracking models. If the pedestrian location cannot be accurately detected in the actual scene, or it is difficult to correctly assign the person ID between different frames, the performance of the action recognition part will be limited. If you encounter the above problems in actual use, please refer to [Secondary Development of Detection Task](../detection_en.md) and [Secondary Development of Multi-target Tracking Task](../pphuman_mot_en.md) for detection/track model optimization.
+
+
+### Half-Body Prediction
+In the action of making a phone call, the action classification can be achieved through the upper body image. Therefore, during the training and prediction process, the image is changed from the pedestrian full-body to half-body.
+
+## Add New Action
+
+### Data Preparation
+Referring to the previous introduction, complete the data preparation part and place it under `{root of PaddleClas}/dataset`:
+
 ```
-    # 每一行采用"空格"分隔图像路径与标注
+data/
+├── images  # All images
+├── label_list.txt # Label file
+├── train_list.txt # Training list, including pictures and their corresponding types
+└── val_list.txt   # Validation list, including pictures and their corresponding types
+```
+Where the training list and validation list file are as follow:
+```
+    # Each line uses "space" to separate the image path and label
     train/000001.jpg 0
     train/000002.jpg 0
     train/000003.jpg 1
-    train/000004.jpg 2   # 新增的类别直接填写对应类别号即可
-    ...
+    train/000004.jpg 2   # For the newly added categories, simply fill in the corresponding category number.
+
+`label_list.txt` should give name of the extension type:
 ```
-`label_list.txt`中需要同样对应扩展类型的名称:
-```
-0 make_a_phone_call  # 类型0
-1 Your New Action    # 类型1
+0 make_a_phone_call  # class 0
+1 Your New Action    # class 1
  ...
-n normal             # 类型n
+n normal             # class n
+```
+    ...
 ```
 
-### 配置文件设置
-在PaddleClas中已经集成了[训练配置文件](https://github.com/PaddlePaddle/PaddleClas/blob/develop/ppcls/configs/practical_models/PPHGNet_tiny_calling_halfbody.yaml)，需要重点关注的设置项如下：
+### Configuration File Settings
+The [training configuration file] (https://github.com/PaddlePaddle/PaddleClas/blob/develop/ppcls/configs/practical_models/PPHGNet_tiny_calling_halfbody.yaml) has been integrated in PaddleClas. The settings that need to be paid attention to are as follows:
 
 ```yaml
 # model architecture
 Arch:
   name: PPHGNet_tiny
-  class_num: 2       # 对应新增后的数量
+  class_num: 2       # Corresponding to the number of action categories
 
   ...
 
-# 正确设置image_root与cls_label_path，保证image_root + cls_label_path中的图片路径能够正确访问图片路径
+# Please correctly set image_root and cls_label_path to ensure that the image_root + image path in cls_label_path can access the image correctly
 DataLoader:
   Train:
     dataset:
@@ -125,13 +127,13 @@ Infer:
     - ToCHWImage:
   PostProcess:
     name: Topk
-    topk: 2                                           # 显示topk的数量，不要超过类别总数
-    class_id_map_file: dataset/phone_label_list.txt   # 修改后的label_list.txt路径
+    topk: 2                                           # Display the number of topks, do not exceed the total number of categories
+    class_id_map_file: dataset/phone_label_list.txt   # path of label_list.txt
 ```
 
-### 模型训练及评估
-#### 模型训练
-通过如下命令启动训练：
+### Model Training And Evaluation
+#### Model Training
+Start training with the following command:
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 python3 -m paddle.distributed.launch \
@@ -140,30 +142,29 @@ python3 -m paddle.distributed.launch \
         -c ./ppcls/configs/practical_models/PPHGNet_tiny_calling_halfbody.yaml \
         -o Arch.pretrained=True
 ```
-其中 `Arch.pretrained` 为 `True`表示使用预训练权重帮助训练。
+where `Arch.pretrained=True` is to use pretrained weights to help with training.
 
-#### 模型评估
-
-训练好模型之后，可以通过以下命令实现对模型指标的评估。
-
+#### Model Evaluation
+After training the model, use the following command to evaluate the model metrics.
 ```bash
 python3 tools/eval.py \
     -c ./ppcls/configs/practical_models/PPHGNet_tiny_calling_halfbody.yaml \
     -o Global.pretrained_model=output/PPHGNet_tiny/best_model
 ```
+Where `-o Global.pretrained_model="output/PPHGNet_tiny/best_model"` specifies the path where the current best weight is located. If other weights are needed, just replace the corresponding path.
 
-其中 `-o Global.pretrained_model="output/PPHGNet_tiny/best_model"` 指定了当前最佳权重所在的路径，如果指定其他权重，只需替换对应的路径即可。
+#### Model Export
+For the detailed introduction of model export, please refer to [here](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/en/inference_deployment/export_model_en.md#2-export-classification-model)
+You can refer to the following steps:
 
-### 模型导出
-模型导出的详细介绍请参考[这里](https://github.com/PaddlePaddle/PaddleClas/blob/develop/docs/en/inference_deployment/export_model_en.md#2-export-classification-model)
-可以参考以下步骤实现：
 ```python
 python tools/export_model.py
     -c ./PPHGNet_tiny_calling_halfbody.yaml \
     -o Global.pretrained_model=./output/PPHGNet_tiny/best_model \
     -o Global.save_inference_dir=./output_inference/PPHGNet_tiny_calling_halfbody
 ```
-然后将导出的模型重命名，并加入配置文件，以适配PP-Human的使用。
+
+Then rename the exported model and add the configuration file to suit the usage of PP-Human.
 ```bash
 cd ./output_inference/PPHGNet_tiny_calling_halfbody
 
@@ -171,22 +172,20 @@ mv inference.pdiparams model.pdiparams
 mv inference.pdiparams.info model.pdiparams.info
 mv inference.pdmodel model.pdmodel
 
-# 下载预测配置文件
+# Download configuration file for inference
 wget https://bj.bcebos.com/v1/paddledet/models/pipeline/infer_configs/PPHGNet_tiny_calling_halfbody/infer_cfg.yml
 ```
 
-至此，即可使用PP-Human进行实际预测了。
+At this point, this model can be used in PP-Human.
 
+### Custom Action Output
+In the model of action recognition based on classification with human id, the task is defined as a picture-level classification task of corresponding person. The type of the corresponding classification is finally regarded as the action type of the current stage. Therefore, on the basis of completing the training and deployment of the custom model, it is also necessary to convert the classification model results to the final action recognition results as output, and the displayed result of the visualization should be modified.
 
-### 自定义行为输出
-基于人体id的分类的行为识别方案中，将任务转化为对应人物的图像进行图片级别的分类。对应分类的类型最终即视为当前阶段的行为。因此在完成自定义模型的训练及部署的基础上，还需要将分类模型结果转化为最终的行为识别结果作为输出，并修改可视化的显示结果。
+Please modify the [postprocessing function](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/pipeline/pphuman/action_infer.py#L509).
 
-#### 转换为行为识别结果
-请对应修改[后处理函数](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/pipeline/pphuman/action_infer.py#L509)。
-
-核心代码为：
+The core code are:
 ```python
-# 确定分类模型的最高分数输出结果
+# Get the highest score output of the classification model
 cls_id_res = 1
 cls_score_res = -1.0
 for cls_id in range(len(cls_result[idx])):
@@ -198,7 +197,8 @@ for cls_id in range(len(cls_result[idx])):
 # Current now,  class 0 is positive, class 1 is negative.
 if cls_id_res == 1 or (cls_id_res == 0 and
                        cls_score_res < self.threshold):
-    # 如果分类结果不是目标行为或是置信度未达到阈值，则根据历史结果确定当前帧的行为
+    # If the classification result is not the target action or its confidence does not reach the threshold,
+    # determine the action type of the current frame according to the historical results
     history_cls, life_remain, history_score = self.result_history.get(
         tracker_id, [1, self.frame_life, -1.0])
     cls_id_res = history_cls
@@ -212,12 +212,12 @@ if cls_id_res == 1 or (cls_id_res == 0 and
         self.result_history[
             tracker_id] = [cls_id_res, life_remain, cls_score_res]
 else:
-    # 分类结果属于目标行为，则使用将该结果，并记录到历史结果中
+    # If the classification result belongs to the target action, use the result and record it in the historical result
     self.result_history[
         tracker_id] = [cls_id_res, self.frame_life, cls_score_res]
 
     ...
 ```
 
-#### 修改可视化输出
-目前基于ID的行为识别，是根据行为识别的结果及预定义的类别名称进行展示的。详细逻辑请见[此处](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/pipeline/pipeline.py#L1024-L1043)。如果自定义的行为需要修改为其他的展示名称，请对应修改此处，以正确输出对应结果。
+#### Modify Visual Output
+At present, ID-based action recognition is displayed based on the results of action recognition and predefined category names. For the detail, please refer to [here](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/pipeline/pipeline.py#L1024-L1043). If the custom action needs to be modified to another display name, please modify it accordingly to output the corresponding result.

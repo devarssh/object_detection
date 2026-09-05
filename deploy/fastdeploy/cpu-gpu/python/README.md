@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection CPU-GPU Python部署示例
 
 本目录下提供`infer.py`快速完成PPYOLOE模型包括PPYOLOE在CPU/GPU，以及GPU上通过Paddle-TensorRT加速部署的示例。 

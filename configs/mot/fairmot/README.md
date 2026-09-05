@@ -1,4 +1,3 @@
-English | [简体中文](README_cn.md)
 
 # FairMOT (FairMOT: On the Fairness of Detection and Re-Identification in Multiple Object Tracking)
 

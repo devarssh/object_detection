@@ -1,81 +1,83 @@
-# 新增模型算法
-为了让用户更好的使用PaddleDetection，本文档中，我们将介绍PaddleDetection的主要模型技术细节及应用
+# How to Create Model Algorithm
+In order to make better use of PaddleDetection, we will introduce the main model technical details and application of PaddleDetection in this document
 
-## 目录
-- [1.简介](#1.简介)
-- [2.新增模型](#2.新增模型)
-  - [2.1新增网络结构](#2.1新增网络结构)
-    - [2.1.1新增Backbone](#2.1.1新增Backbone)
-    - [2.1.2新增Neck](#2.1.2新增Neck)
-    - [2.1.3新增Head](#2.1.3新增Head)
-    - [2.1.4新增Loss](#2.1.4新增Loss)
-    - [2.1.5新增后处理模块](#2.1.5新增后处理模块)
-    - [2.1.6新增Architecture](#2.1.6新增Architecture)
-  - [2.2新增配置文件](#2.2新增配置文件)
-    - [2.2.1网络结构配置文件](#2.2.1网络结构配置文件)
-    - [2.2.2优化器配置文件](#2.2.2优化器配置文件)
-    - [2.2.3Reader配置文件](#2.2.3Reader配置文件)
+## Directory
+- [How to Create Model Algorithm](#how-to-create-model-algorithm)
+  - [Directory](#directory)
+    - [1. Introduction](#1-introduction)
+    - [2. Create Model](#2-create-model)
+      - [2.1 Create Model Structure](#21-create-model-structure)
+        - [2.1.1 Create Backbone](#211-create-backbone)
+        - [2.1.2 Create Neck](#212-create-neck)
+        - [2.1.3 Create Head](#213-create-head)
+        - [2.1.4 Create Loss](#214-create-loss)
+        - [2.1.5 Create Post-processing Module](#215-create-post-processing-module)
+        - [2.1.6 Create Architecture](#216-create-architecture)
+      - [2.2 Create Configuration File](#22-create-configuration-file)
+        - [2.2.1 Network Structure Configuration File](#221-network-structure-configuration-file)
+        - [2.2.2 Optimizer configuration file](#222-optimizer-configuration-file)
+        - [2.2.3 Reader Configuration File](#223-reader-configuration-file)
 
-### 1.简介
-PaddleDetecion中的每一种模型对应一个文件夹，以yolov3为例，yolov3系列的模型对应于`configs/yolov3`文件夹，其中yolov3_darknet的总配置文件`configs/yolov3/yolov3_darknet53_270e_coco.yml`的内容如下：
+### 1. Introduction
+Each model in the PaddleDetecion corresponds to a folder. In the case of Yolov3, models in the Yolov3 family correspond to the `configs/yolov3` folder. Yolov3 Darknet's general configuration file `configs/yolov3/yolov3_darknet53_270e_coco.yml`.
 ```
 _BASE_: [
-  '../datasets/coco_detection.yml', # 数据集配置文件，所有模型共用
-  '../runtime.yml', # 运行时相关配置
-  '_base_/optimizer_270e.yml', # 优化器相关配置
-  '_base_/yolov3_darknet53.yml', # yolov3网络结构配置文件
-  '_base_/yolov3_reader.yml', # yolov3 Reader模块配置
+  '../datasets/coco_detection.yml', # Dataset configuration file shared by all models
+  '../runtime.yml', # Runtime configuration
+  '_base_/optimizer_270e.yml', # Optimizer related configuration
+  '_base_/yolov3_darknet53.yml', # yolov3 Network structure configuration file
+  '_base_/yolov3_reader.yml', # yolov3 Reader module configuration
 ]
 
-# 定义在此处的相关配置可以覆盖上述文件中的同名配置
+# The relevant configuration defined here can override the configuration of the same name in the above file
 snapshot_epoch: 5
 weights: output/yolov3_darknet53_270e_coco/model_final
 ```
-可以看到，配置文件中的模块进行了清晰的划分，除了公共的数据集配置以及运行时配置，其他配置被划分为优化器，网络结构以及Reader模块。PaddleDetection中支持丰富的优化器，学习率调整策略，预处理算子等，因此大多数情况下不需要编写优化器以及Reader相关的代码，而只需要在配置文件中配置即可。因此，新增一个模型的主要在于搭建网络结构。
+As you can see, the modules in the configuration file are clearly divided into optimizer, network structure, and reader modules, with the exception of the common dataset configuration and runtime configuration. Rich optimizers, learning rate adjustment strategies, preprocessing operators, etc., are supported in PaddleDetection, so most of the time you don't need to write the optimizer and reader-related code, just configure it in the configuration file. Therefore, the main purpose of adding a new model is to build the network structure.
 
-PaddleDetection网络结构的代码在`ppdet/modeling/`中，所有网络结构以组件的形式进行定义与组合，网络结构的主要构成如下所示：
+In `ppdet/modeling/`, all of the Paddle Detection network structures are defined and combined in the form of components. The main components of the network structure are as follows:
 ```
   ppdet/modeling/
   ├── architectures
-  │   ├── faster_rcnn.py # Faster Rcnn模型
-  │   ├── ssd.py         # SSD模型
-  │   ├── yolo.py      # YOLOv3模型
+  │   ├── faster_rcnn.py # Faster Rcnn model
+  │   ├── ssd.py         # SSD model
+  │   ├── yolo.py      # YOLOv3 model
   │   │   ...
-  ├── heads       # 检测头模块
-  │   ├── xxx_head.py    # 定义各类检测头
-  │   ├── roi_extractor.py #检测感兴趣区域提取
-  ├── backbones          # 基干网络模块
-  │   ├── resnet.py      # ResNet网络
-  │   ├── mobilenet.py   # MobileNet网络
+  ├── heads       # detection head module
+  │   ├── xxx_head.py    # define various detection heads
+  │   ├── roi_extractor.py # detection of region of interest extraction
+  ├── backbones          # backbone network module
+  │   ├── resnet.py      # ResNet network
+  │   ├── mobilenet.py   # MobileNet network
   │   │   ...
-  ├── losses             # 损失函数模块
-  │   ├── xxx_loss.py    # 定义注册各类loss函数
-  ├── necks     # 特征融合模块
-  │   ├── xxx_fpn.py  # 定义各种FPN模块
-  ├── proposal_generator # anchor & proposal生成与匹配模块
-  │   ├── anchor_generator.py   # anchor生成模块
-  │   ├── proposal_generator.py # proposal生成模块
-  │   ├── target.py   # anchor & proposal的匹配函数
-  │   ├── target_layer.py   # anchor & proposal的匹配模块
-  ├── tests  # 单元测试模块
-  │   ├── test_xxx.py  # 对网络中的算子以及模块结构进行单元测试
-  ├── ops.py  # 封装各类PaddlePaddle物体检测相关公共检测组件/算子
-  ├── layers.py  # 封装及注册各类PaddlePaddle物体检测相关公共检测组件/算子
-  ├── bbox_utils.py # 封装检测框相关的函数
-  ├── post_process.py # 封装及注册后处理相关模块
-  ├── shape_spec.py # 定义模块输出shape的类
+  ├── losses             # loss function module
+  │   ├── xxx_loss.py    # define and register various loss functions
+  ├── necks     # feature fusion module
+  │   ├── xxx_fpn.py  # define various FPN modules
+  ├── proposal_generator # anchor & proposal generate and match modules
+  │   ├── anchor_generator.py   # anchor generate modules
+  │   ├── proposal_generator.py # proposal generate modules
+  │   ├── target.py   # anchor & proposal Matching function
+  │   ├── target_layer.py   # anchor & proposal Matching function
+  ├── tests  # unit test module
+  │   ├── test_xxx.py  # the operator and module structure in the network are unit tested
+  ├── ops.py  # encapsulates all kinds of common detection components/operators related to the detection of PaddlePaddle objects
+  ├── layers.py  # encapsulates and register all kinds of PaddlePaddle object detection related public detection components/operators
+  ├── bbox_utils.py # encapsulates the box-related functions
+  ├── post_process.py # encapsulate and process related modules after registration
+  ├── shape_spec.py # defines a class for the module to output shape
 ```
 
 ![](../images/model_figure.png)
 
-### 2.新增模型
-接下来，以单阶段检测器YOLOv3为例，对建立模型过程进行详细描述，按照此思路您可以快速搭建新的模型。
+### 2. Create Model
+Next, the modeling process is described in detail by taking the single-stage detector YOLOv3 as an example, so that you can quickly build a new model according to this idea.
 
-#### 2.1新增网络结构
+#### 2.1 Create Model Structure
 
-##### 2.1.1新增Backbone
+##### 2.1.1 Create Backbone
 
-PaddleDetection中现有所有Backbone网络代码都放置在`ppdet/modeling/backbones`目录下，所以我们在其中新建`darknet.py`如下：
+All existing Backbone network code in PaddleDetection is placed under `ppdet/modeling/backbones` directory, so we created `darknet.py` as follows:
 ```python
 import paddle.nn as nn
 from ppdet.core.workspace import register, serializable
@@ -92,29 +94,29 @@ class DarkNet(nn.Layer):
                  norm_type='bn',
                  norm_decay=0.):
         super(DarkNet, self).__init__()
-        # 省略内容
+        # Omit the content
 
     def forward(self, inputs):
-        # 省略处理逻辑
+        # Ellipsis processing logic
         pass
 
     @property
     def out_shape(self):
-        # 省略内容
+        # Omit the content
         pass
 ```
-然后在`backbones/__init__.py`中加入引用：
+Then add a reference to `backbones/__init__.py`:
 ```python
 from . import darknet
 from .darknet import *
 ```
-**几点说明：**
-- 为了在yaml配置文件中灵活配置网络，所有Backbone需要利用`ppdet.core.workspace`里的`register`进行注册，形式请参考如上示例。此外，可以使用`serializable`以使backbone支持序列化；
-- 所有的Backbone需继承`paddle.nn.Layer`类，并实现forward函数。此外，还需实现out_shape属性定义输出的feature map的channel信息，具体可参见源码；
-- `__shared__`为了实现一些参数的配置全局共享，这些参数可以被backbone, neck，head，loss等所有注册模块共享。
+**A few notes:**
+- To flexibly configure networks in the YAML configuration file, all backbone nodes need to register in `ppdet.core.workspace` as shown in the preceding example. In addition, `serializable` can be used to enable backbone to support serialization;
+- All backbone needs to inherit the `paddle.nn.Layer` class and implement the forward function. In addition, it is necessary to implement the out shape attribute to define the channel information of the output feature map. For details, please refer to the source code.
+- `__shared__` To realize global sharing of configuration parameters, these parameters can be shared by all registration modules, such as backbone, neck, head, and loss. 
 
-##### 2.1.2新增Neck
-特征融合模块放置在`ppdet/modeling/necks`目录下，我们在其中新建`yolo_fpn.py`如下：
+##### 2.1.2 Create Neck
+The feature fusion module is placed under the `ppdet/modeling/necks` directory and we create the following `yolo_fpn.py`:
 
 ``` python
 import paddle.nn as nn
@@ -129,34 +131,34 @@ class YOLOv3FPN(nn.Layer):
                 in_channels=[256, 512, 1024],
                 norm_type='bn'):
         super(YOLOv3FPN, self).__init__()
-        # 省略内容
+        # Omit the content
 
     def forward(self, blocks):
-        # 省略内容
+        # Omit the content
         pass
 
     @classmethod
     def from_config(cls, cfg, input_shape):
-        # 省略内容
+        # Omit the content
         pass
 
     @property
     def out_shape(self):
-        # 省略内容
+        # Omit the content
         pass
 ```
-然后在`necks/__init__.py`中加入引用：
+Then add a reference to `necks/__init__.py`:
 ```python
 from . import yolo_fpn
 from .yolo_fpn import *
 ```
-**几点说明：**
-- neck模块需要使用`register`进行注册，可以使用`serializable`进行序列化；
-- neck模块需要继承`paddle.nn.Layer`类，并实现forward函数。除此之外，还需要实现`out_shape`属性，用于定义输出的feature map的channel信息，还需要实现类函数`from_config`用于在配置文件中推理出输入channel，并用于`YOLOv3FPN`的初始化；
-- neck模块可以使用`__shared__`实现一些参数的配置全局共享。
+**A few notes:**
+- The neck module needs to be registered with `register` and can be serialized with `serializable`.
+- The neck module needs to inherit the `paddle.nn.Layer` class and implement the forward function. In addition, the `out_shape` attribute needs to be implemented to define the channel information of the output feature map, and the class function `from_config` needs to be implemented to deduce the input channel in the configuration file and initialize `YOLOv3FPN`.
+- The neck module can use `shared` to implement global sharing of configuration parameters.
 
-##### 2.1.3新增Head
-Head模块全部存放在`ppdet/modeling/heads`目录下，我们在其中新建`yolo_head.py`如下
+##### 2.1.3 Create Head
+The head module is all stored in the `ppdet/modeling/heads` directory, where we create `yolo_head.py` as follows
 ``` python
 import paddle.nn as nn
 from ppdet.core.workspace import register
@@ -176,24 +178,24 @@ class YOLOv3Head(nn.Layer):
                  iou_aware=False,
                  iou_aware_factor=0.4):
         super(YOLOv3Head, self).__init__()
-        # 省略内容
+        # Omit the content
 
     def forward(self, feats, targets=None):
-        # 省略内容
+        # Omit the content
         pass
 ```
-然后在`heads/__init__.py`中加入引用：
+Then add a reference to `heads/__init__.py`:
 ```python
 from . import yolo_head
 from .yolo_head import *
 ```
-**几点说明：**
-- Head模块需要使用`register`进行注册；
-- Head模块需要继承`paddle.nn.Layer`类，并实现forward函数。
-- `__inject__`表示引入全局字典中已经封装好的模块。如loss等。
+**A few notes:**
+- The head module needs to register with `register`.
+- The head module needs to inherit the `paddle.nn.Layer` class and implement the forward function.
+- `__inject__` indicates that the module encapsulated in the global dictionary is imported. Such as loss, etc.
 
-##### 2.1.4新增Loss
-Loss模块全部存放在`ppdet/modeling/losses`目录下，我们在其中新建`yolo_loss.py`下
+##### 2.1.4 Create Loss
+The loss modules are all stored under `ppdet/modeling/losses` directory, where we created `yolo_loss.py`
 ```python
 import paddle.nn as nn
 from ppdet.core.workspace import register
@@ -213,24 +215,24 @@ class YOLOv3Loss(nn.Layer):
                  iou_loss=None,
                  iou_aware_loss=None):
         super(YOLOv3Loss, self).__init__()
-        # 省略内容
+        # Omit the content
 
     def forward(self, inputs, targets, anchors):
-        # 省略内容
+        # Omit the content
         pass
 ```
-然后在`losses/__init__.py`中加入引用：
+Then add a reference to `losses/__init__.py`:
 ```python
 from . import yolo_loss
 from .yolo_loss import *
 ```
-**几点说明：**
-- loss模块需要使用`register`进行注册；
-- loss模块需要继承`paddle.nn.Layer`类，并实现forward函数。
-- 可以使用`__inject__`表示引入全局字典中已经封装好的模块，使用`__shared__`可以实现一些参数的配置全局共享。
+**A few notes:**
+- The loss module needs to register with `register`.
+- The loss module needs to inherit the `paddle.nn.Layer` class and implement the forward function.
+- `__inject__` modules that have been encapsulated in the global dictionary can be used. Some parameters can be globally shared with `__shared__` configuration.
 
-##### 2.1.5新增后处理模块
-后处理模块定义在`ppdet/modeling/post_process.py`中，其中定义了`BBoxPostProcess`类来进行后处理操作，如下所示：
+##### 2.1.5 Create Post-processing Module
+The post-processing module is defined in `ppdet/modeling/post_process.py`, where the `BBoxPostProcess` class is defined for post-processing operations, as follows:
 ``` python
 from ppdet.core.workspace import register
 
@@ -240,20 +242,20 @@ class BBoxPostProcess(object):
     __inject__ = ['decode', 'nms']
 
     def __init__(self, num_classes=80, decode=None, nms=None):
-        # 省略内容
+        # Omit the content
         pass
 
     def __call__(self, head_out, rois, im_shape, scale_factor):
-        # 省略内容
+        # Omit the content
         pass
 ```
-**几点说明：**
-- 后处理模块需要使用`register`进行注册
-- `__inject__`注入了全局字典中封装好的模块，如decode和nms等。decode和nms定义在`ppdet/modeling/layers.py`中。
+**A few notes:**
+- Post-processing modules need to register with `register`
+- `__inject__` modules encapsulated in the global dictionary, such as decode and NMS. Decode and NMS are defined in `ppdet/modeling/layers.py`.
 
-##### 2.1.6新增Architecture
+##### 2.1.6 Create Architecture
 
-所有architecture网络代码都放置在`ppdet/modeling/architectures`目录下，`meta_arch.py`中定义了`BaseArch`类，代码如下：
+All architecture network code is placed in `ppdet/modeling/architectures` directory, `meta_arch.py` defines the `BaseArch` class, the code is as follows:
 ``` python
 import paddle.nn as nn
 from ppdet.core.workspace import register
@@ -282,7 +284,7 @@ class BaseArch(nn.Layer):
     def get_pred(self, ):
         raise NotImplementedError("Should implement get_pred method!")
 ```
-所有的architecture需要继承`BaseArch`类，如`yolo.py`中的`YOLOv3`定义如下：
+All architecture needs to inherit from the `BaseArch` class, as defined by `yolo.py` in `YOLOv3` as follows:
 ``` python
 @register
 class YOLOv3(BaseArch):
@@ -302,28 +304,28 @@ class YOLOv3(BaseArch):
 
     @classmethod
     def from_config(cls, cfg, *args, **kwargs):
-        # 省略内容
+        # Omit the content
         pass
 
     def get_loss(self):
-        # 省略内容
+        # Omit the content
         pass
 
     def get_pred(self):
-        # 省略内容
+        # Omit the content
         pass
 ```
 
-**几点说明：**
-- 所有的architecture需要使用`register`进行注册
-- 在组建一个完整的网络时必须要设定`__category__ = 'architecture'`来表示一个完整的物体检测模型；
-- backbone, neck, yolo_head以及post_process等检测组件传入到architecture中组成最终的网络。像这样将检测模块化，提升了检测模型的复用性，可以通过组合不同的检测组件得到多个模型。
-- from_config类函数实现了模块间组合时channel的自动配置。
+**A few notes:**
+- All architecture needs to be registered using a `register`
+- When constructing a complete network, `__category__ = 'architecture'` must be set to represent a complete object detection model;
+- Backbone, neck, YOLO head, post-process and other inspection components are passed into the architecture to form the final network. Modularization of detection like this improves the reusability of detection models, and multiple models can be obtained by combining different detection components.
+- The from config class function implements the automatic configuration of channels when modules are combined.
 
-#### 2.2新增配置文件
+#### 2.2 Create Configuration File
 
-##### 2.2.1网络结构配置文件
-上面详细地介绍了如何新增一个architecture，接下来演示如何配置一个模型，yolov3关于网络结构的配置在`configs/yolov3/_base_/`文件夹中定义，如`yolov3_darknet53.yml`定义了yolov3_darknet的网络结构，其定义如下：
+##### 2.2.1 Network Structure Configuration File
+The configuration of the yolov3 network structure is defined in the `configs/yolov3/_base_/` folder. For example, `yolov3_darknet53.yml` defines the network structure of Yolov3 Darknet as follows:
 ```
 architecture: YOLOv3
 pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/DarkNet53_pretrained.pdparams
@@ -368,11 +370,10 @@ BBoxPostProcess:
     nms_top_k: 1000
 
 ```
-可以看到在配置文件中，首先需要指定网络的architecture，pretrain_weights指定训练模型的url或者路径，norm_type等可以作为全局参数共享。模型的定义自上而下依次在文件中定义，与上节中的模型组件一一对应。对于一些模型组件，如果采用默认
-的参数，可以不用配置，如上文中的`yolo_fpn`。通过改变相关配置，我们可以轻易地组合出另一个模型，比如`configs/yolov3/_base_/yolov3_mobilenet_v1.yml`将backbone从Darknet切换成MobileNet。
+In the configuration file, you need to specify the network architecture, pretrain weights to specify the URL or path of the training model, and norm type to share as global parameters. The definition of the model is defined in the file from top to bottom, corresponding to the model components in the previous section. For some model components, if the default parameters are used, you do not need to configure them, such as `yolo_fpn` above. By changing related configuration, we can easily combine another model, such as `configs/yolov3/_base_/yolov3_mobilenet_v1.yml` to switch backbone from Darknet to MobileNet.
 
-##### 2.2.2优化器配置文件
-优化器配置文件定义模型使用的优化器以及学习率的调度策略，目前PaddleDetection中已经集成了多种多样的优化器和学习率策略，具体可参见代码`ppdet/optimizer.py`。比如，yolov3的优化器配置文件定义在`configs/yolov3/_base_/optimizer_270e.yml`，其定义如下：
+##### 2.2.2 Optimizer configuration file
+The optimizer profile defines the optimizer used by the model and the learning rate scheduling strategy. Currently, a variety of optimizers and learning rate strategies have been integrated in PaddleDetection, as described in the code `ppdet/optimizer.py`. For example, the optimizer configuration file for yolov3 is defined in `configs/yolov3/_base_/optimizer_270e.yml` as follows:
 ```
 epoch: 270
 
@@ -382,7 +383,7 @@ LearningRate:
   - !PiecewiseDecay
     gamma: 0.1
     milestones:
-    # epoch数目
+    # epoch number
     - 216
     - 243
   - !LinearWarmup
@@ -397,11 +398,12 @@ OptimizerBuilder:
     factor: 0.0005
     type: L2
 ```
-**几点说明：**
-- 可以通过OptimizerBuilder.optimizer指定优化器的类型及参数，目前支持的优化器可以参考[PaddlePaddle官方文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/optimizer/Overview_cn.html)
-- 可以设置LearningRate.schedulers设置不同学习率调整策略的组合，PaddlePaddle目前支持多种学习率调整策略，具体也可参考[PaddlePaddle官方文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/optimizer/Overview_cn.html)。需要注意的是，你需要对于PaddlePaddle中的学习率调整策略进行简单的封装，具体可参考源码`ppdet/optimizer.py`。
+**A few notes:**
+- Optimizer builder. Optimizer specifies the type and parameters of the Optimizer. Currently support the optimizer can reference [PaddlePaddle official documentation](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/optimizer/Overview_cn.html)
+- The `LearningRate.schedulers` sets the combination of different Learning Rate adjustment strategies. Paddle currently supports a variety of Learning Rate adjustment strategies. Specific also can reference [Paddle Paddle official documentation](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/optimizer/Overview_cn.html). It is important to note that you need to simply package the learning rate adjustment strategy in Paddle, which can be found in the source code `ppdet/optimizer.py`.
 
-##### 2.2.3Reader配置文件
-关于Reader的配置可以参考[Reader配置文档](./READER.md#5.配置及运行)。
 
-> 看过此文档，您应该对PaddleDetection中模型搭建与配置有了一定经验，结合源码会理解的更加透彻。关于模型技术，如您有其他问题或建议，请给我们提issue，我们非常欢迎您的反馈。
+##### 2.2.3 Reader Configuration File
+For Reader configuration, see [Reader configuration documentation](./READER_en.md#5.Configuration-and-Operation).
+
+> After reading this document, you should have some experience in model construction and configuration of Paddle Detection, and you will understand it more thoroughly with the source code. If you have other questions or suggestions about model technology, please send us an issue. We welcome your feedback.

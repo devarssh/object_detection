@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 # PaddleDetection 昆仑芯 XPU Python部署示例
 
 本目录下提供`infer.py`快速完成PPYOLOE模型在昆仑芯 XPU上的加速部署的示例。 

@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 
 # PaddleDetection RKNPU2部署示例
 

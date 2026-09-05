@@ -1,4 +1,3 @@
-简体中文 | [English](./ppvehicle_plate_en.md)
 
 # 车牌识别任务二次开发
 

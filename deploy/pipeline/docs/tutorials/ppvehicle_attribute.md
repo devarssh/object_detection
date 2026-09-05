@@ -1,25 +1,24 @@
-[English](ppvehicle_attribute_en.md) | 简体中文
 
-# PP-Vehicle属性识别模块
+# Attribute Recognition Module of PP-Vehicle
 
-车辆属性识别在智慧城市，智慧交通等方向具有广泛应用。在PP-Vehicle中，集成了车辆属性识别模块，可识别车辆颜色及车型属性的识别。
+Vehicle attribute recognition is widely used in smart cities, smart transportation and other scenarios. In PP-Vehicle, a vehicle attribute recognition module is integrated, which can identify vehicle color and model.
 
-| 任务 | 算法 | 精度 | 预测速度 | 下载链接|
-|-----------|------|-----------|----------|---------------|
-| 车辆检测/跟踪 | PP-YOLOE | mAP 63.9 | 38.67ms | [预测部署模型](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_ppvehicle.zip) |
-| 车辆属性识别 | PPLCNet | 90.81 | 7.31 ms | [预测部署模型](https://bj.bcebos.com/v1/paddledet/models/pipeline/vehicle_attribute_model.zip) |
-
-
-注意：
-1. 属性模型预测速度是基于NVIDIA T4, 开启TensorRT FP16得到。模型预测速度包含数据预处理、模型预测、后处理部分。
-2. 关于PP-LCNet的介绍可以参考[PP-LCNet](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/models/PP-LCNet.md)介绍，相关论文可以查阅[PP-LCNet paper](https://arxiv.org/abs/2109.15099)。
-3. 属性模型的训练和精度测试均基于[VeRi数据集](https://www.v7labs.com/open-datasets/veri-dataset)。
+| Task | Algorithm | Precision | Inference Speed | Download |
+|-----------|------|-----------|----------|---------------------|
+| Vehicle Detection/Tracking | PP-YOLOE | mAP 63.9 | 38.67ms | [Inference and Deployment Model](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_ppvehicle.zip) |
+| Vehicle Attribute Recognition | PPLCNet | 90.81 | 7.31 ms | [Inference and Deployment Model](https://bj.bcebos.com/v1/paddledet/models/pipeline/vehicle_attribute_model.zip) |
 
 
-- 当前提供的预训练模型支持识别10种车辆颜色及9种车型，同VeRi数据集，具体如下：
+Note:
+1. The inference speed of the attribute model is obtained from the test on NVIDIA T4, with TensorRT FP16. The time includes data pre-process, model inference and post-process.
+2. For introductions, please refer to [PP-LCNet Series](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/en/models/PP-LCNet_en.md). Related paper is available on PP-LCNet paper
+3. The training and test phase of vehicle attribute recognition model are both obtained from [VeRi dataset](https://www.v7labs.com/open-datasets/veri-dataset).
+
+
+- The provided pre-trained model supports 10 colors and 9 models, which is the same with VeRi dataset. The details are as follows:
 
 ```yaml
-# 车辆颜色
+# Vehicle Colors
 - "yellow"
 - "orange"
 - "green"
@@ -31,7 +30,7 @@
 - "brown"
 - "black"
 
-# 车型
+# Vehicle Models
 - "sedan"
 - "suv"
 - "van"
@@ -43,56 +42,58 @@
 - "estate"
 ```
 
-## 使用方法
+## Instructions
 
-### 配置项说明
+### Description of Configuration
 
-[配置文件](../../config/infer_cfg_ppvehicle.yml)中与属性相关的参数如下：
-```
+Parameters related to vehicle attribute recognition in the [config file](../../config/infer_cfg_ppvehicle.yml) are as follows:
+
+```yaml
 VEHICLE_ATTR:
-  model_dir: output_inference/vehicle_attribute_infer/ # 车辆属性模型调用路径
-  batch_size: 8     # 模型预测时的batch_size大小
-  color_threshold: 0.5  # 颜色属性阈值，需要置信度达到此阈值才会确定具体颜色，否则为'Unknown‘
-  type_threshold: 0.5   # 车型属性阈值，需要置信度达到此阈值才会确定具体属性，否则为'Unknown‘
-  enable: False         # 是否开启该功能
+  model_dir: output_inference/vehicle_attribute_infer/ # Path of the model
+  batch_size: 8     # The size of the inference batch
+  color_threshold: 0.5  # Threshold of color. Confidence is required to reach this threshold to determine the specific attribute, otherwise it will be 'Unknown‘.
+  type_threshold: 0.5   # Threshold of vehicle model. Confidence is required to reach this threshold to determine the specific attribute, otherwise it will be 'Unknown‘.
+  enable: False         # Whether to enable this function
 ```
 
-### 使用命令
+### How to Use
+1. Download models `Vehicle Detection/Tracking` and `Vehicle Attribute Recognition` from the links in `Model Zoo` and unzip them to ```./output_inference```. The models are automatically downloaded by default. If you download them manually, you need to modify the `model_dir` as the model storage path to use this function.
 
-1. 从模型库下载`车辆检测/跟踪`, `车辆属性识别`两个预测部署模型并解压到`./output_inference`路径下；默认会自动下载模型，如果手动下载，需要修改模型文件夹为模型存放路径。
-2. 修改配置文件中`VEHICLE_ATTR`项的`enable: True`，以启用该功能。
-3. 图片输入时，启动命令如下(更多命令参数说明，请参考[快速开始-参数说明](./PPVehicle_QUICK_STARTED.md))：
+2. Set the "enable: True" of `VEHICLE_ATTR` in infer_cfg_ppvehicle.yml.
+
+3. For image input, please run these commands. (Description of more parameters, please refer to [QUICK_STARTED - Parameter_Description](./PPVehicle_QUICK_STARTED.md).
 
 ```bash
-# 预测单张图片文件
+# For single image
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --image_file=test_image.jpg \
                                                    --device=gpu
 
-# 预测包含一张或多张图片的文件夹
+# For folder contains one or multiple images
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --image_dir=images/ \
                                                    --device=gpu
 ```
 
-4. 视频输入时，启动命令如下：
+4. For video input, please run these commands.
 
 ```bash
-#预测单个视频文件
+# For single video
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --video_file=test_video.mp4 \
                                                    --device=gpu
 
-#预测包含一个或多个视频的文件夹
+# For folder contains one or multiple videos
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --video_dir=test_videos/ \
                                                    --device=gpu
 ```
 
-5. 若修改模型路径，有以下两种方式：
+5. There are two ways to modify the model path:
 
-    - 方法一：`./deploy/pipeline/config/infer_cfg_ppvehicle.yml`下可以配置不同模型路径，属性识别模型修改`VEHICLE_ATTR`字段下配置
-    - 方法二：直接在命令行中增加`-o`，以覆盖配置文件中的默认模型路径：
+    - Method 1：Set paths of each model in `./deploy/pipeline/config/infer_cfg_ppvehicle.yml`. For vehicle attribute recognition, the path should be modified under the `VEHICLE_ATTR` field.
+    - Method 2: Directly add `-o` in command line to override the default model path in the configuration file:
 
 ```bash
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
@@ -101,17 +102,19 @@ python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppv
                                                    -o VEHICLE_ATTR.model_dir=output_inference/vehicle_attribute_infer
 ```
 
-测试效果如下：
+The result is shown as follow:
 
 <div width="600" align="center">
   <img src="https://user-images.githubusercontent.com/22989727/205599146-56abd72f-6e0a-4a21-bd11-f8bb421f2887.gif"/>
 </div>
 
-## 方案说明
-车辆属性识别模型使用了[PaddleClas](https://github.com/PaddlePaddle/PaddleClas) 的超轻量图像分类方案(PULC，Practical Ultra Lightweight image Classification)。关于该模型的数据准备、训练、测试等详细内容，请见[PULC 车辆属性识别模型](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/zh_CN/PULC/PULC_vehicle_attribute.md).
 
-车辆属性识别模型选用了轻量级、高精度的PPLCNet。并在该模型的基础上，进一步使用了以下优化方案：
+### Features to the Solution
 
-- 使用SSLD预训练模型，在不改变推理速度的前提下，精度可以提升约0.5个百分点
-- 融合EDA数据增强策略，精度可以再提升0.52个百分点
-- 使用SKL-UGI知识蒸馏, 精度可以继续提升0.23个百分点
+The vehicle attribute recognition model adopts PULC, Practical Ultra Lightweight image Classification from [PaddleClas](https://github.com/PaddlePaddle/PaddleClas). For details on data preparation, training, and testing of the model, please refer to [PULC Recognition Model of Vehicle Attribute](https://github.com/PaddlePaddle/PaddleClas/blob/release/2.4/docs/en/PULC/PULC_vehicle_attribute_en.md).
+
+The vehicle attribute recognition model adopts the lightweight and high-precision PPLCNet. And on top of PPLCNet, our model optimized via::
+
+- Improved about 0.5 percentage points accuracy by using the SSLD pre-trained model without changing the inference speed.
+- Improved 0.52 percentage points accuracy further by integrating EDA data augmentation strategy.
+- Improved 0.23 percentage points accuracy by using SKL-UGI knowledge distillation.

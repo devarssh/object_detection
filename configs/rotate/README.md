@@ -1,39 +1,37 @@
-简体中文 | [English](README_en.md)
 
-# 旋转框检测
+# Rotated Object Detection
 
-## 内容
-- [简介](#简介)
-- [模型库](#模型库)
-- [数据准备](#数据准备)
-- [安装依赖](#安装依赖)
+## Table of Contents
+- [Introduction](#Introduction)
+- [Model Zoo](#Model-Zoo)
+- [Data Preparation](#Data-Preparation)
+- [Installation](#Installation)
 
-## 简介
-旋转框常用于检测带有角度信息的矩形框，即矩形框的宽和高不再与图像坐标轴平行。相较于水平矩形框，旋转矩形框一般包括更少的背景信息。旋转框检测常用于遥感等场景中。
+## Introduction
+Rotated object detection is used to detect rectangular bounding boxes with angle information, that is, the long and short sides of the rectangular bounding box are no longer parallel to the image coordinate axes. Oriented bounding boxes generally contain less background information than horizontal bounding boxes. Rotated object detection is often used in remote sensing scenarios.
 
-## 模型库
-
-| 模型 | mAP | 学习率策略 | 角度表示 | 数据增广 | GPU数目 | 每GPU图片数目 | 模型下载 | 配置文件 |
+## Model Zoo
+| Model | mAP | Lr Scheduler | Angle | Aug | GPU Number | images/GPU | download | config |
 |:---:|:----:|:---------:|:-----:|:--------:|:-----:|:------------:|:-------:|:------:|
-| [S2ANet](./s2anet/README.md) | 73.84 | 2x | le135 | - | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/s2anet_alignconv_2x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/s2anet/s2anet_alignconv_2x_dota.yml) |
-| [FCOSR](./fcosr/README.md) | 76.62 | 3x | oc | RR | 4 | 4 | [model](https://paddledet.bj.bcebos.com/models/fcosr_x50_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/fcosr/fcosr_x50_3x_dota.yml) |
-| [PP-YOLOE-R-s](./ppyoloe_r/README.md) | 73.82 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota.yml) |
-| [PP-YOLOE-R-s](./ppyoloe_r/README.md) | 79.42 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota_ms.yml) |
-| [PP-YOLOE-R-m](./ppyoloe_r/README.md) | 77.64 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_m_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_m_3x_dota.yml) |
-| [PP-YOLOE-R-m](./ppyoloe_r/README.md) | 79.71 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_m_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_m_3x_dota_ms.yml) |
-| [PP-YOLOE-R-l](./ppyoloe_r/README.md) | 78.14 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml) |
-| [PP-YOLOE-R-l](./ppyoloe_r/README.md) | 80.02 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota_ms.yml) |
-| [PP-YOLOE-R-x](./ppyoloe_r/README.md) | 78.28 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota.yml) |
-| [PP-YOLOE-R-x](./ppyoloe_r/README.md) | 80.73 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota_ms.yml) |
+| [S2ANet](./s2anet/README_en.md) | 73.84 | 2x | le135 | - | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/s2anet_alignconv_2x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/s2anet/s2anet_alignconv_2x_dota.yml) |
+| [FCOSR](./fcosr/README_en.md) | 76.62 | 3x | oc | RR | 4 | 4 | [model](https://paddledet.bj.bcebos.com/models/fcosr_x50_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/fcosr/fcosr_x50_3x_dota.yml) |
+| [PP-YOLOE-R-s](./ppyoloe_r/README_en.md) | 73.82 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota.yml) |
+| [PP-YOLOE-R-s](./ppyoloe_r/README_en.md) | 79.42 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_s_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_s_3x_dota_ms.yml) |
+| [PP-YOLOE-R-m](./ppyoloe_r/README_en.md) | 77.64 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_m_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_m_3x_dota.yml) |
+| [PP-YOLOE-R-m](./ppyoloe_r/README_en.md) | 79.71 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_m_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_m_3x_dota_ms.yml) |
+| [PP-YOLOE-R-l](./ppyoloe_r/README_en.md) | 78.14 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota.yml) |
+| [PP-YOLOE-R-l](./ppyoloe_r/README_en.md) | 80.02 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_l_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_l_3x_dota_ms.yml) |
+| [PP-YOLOE-R-x](./ppyoloe_r/README_en.md) | 78.28 | 3x | oc | RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota.yml) |
+| [PP-YOLOE-R-x](./ppyoloe_r/README_en.md) | 80.73 | 3x | oc | MS+RR | 4 | 2 | [model](https://paddledet.bj.bcebos.com/models/ppyoloe_r_crn_x_3x_dota_ms.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/rotate/ppyoloe_r/ppyoloe_r_crn_x_3x_dota_ms.yml) |
 
-**注意:**
+**Notes:**
 
-- 如果**GPU卡数**或者**batch size**发生了改变，你需要按照公式 **lr<sub>new</sub> = lr<sub>default</sub> * (batch_size<sub>new</sub> * GPU_number<sub>new</sub>) / (batch_size<sub>default</sub> * GPU_number<sub>default</sub>)** 调整学习率。
-- 模型库中的模型默认使用单尺度训练单尺度测试。如果数据增广一栏标明MS，意味着使用多尺度训练和多尺度测试。如果数据增广一栏标明RR，意味着使用RandomRotate数据增广进行训练。
+- if **GPU number** or **mini-batch size** is changed, **learning rate** should be adjusted according to the formula **lr<sub>new</sub> = lr<sub>default</sub> * (batch_size<sub>new</sub> * GPU_number<sub>new</sub>) / (batch_size<sub>default</sub> * GPU_number<sub>default</sub>)**.
+- Models in model zoo is trained and tested with single scale by default. If `MS` is indicated in the data augmentation column, it means that multi-scale training and multi-scale testing are used. If `RR` is indicated in the data augmentation column, it means that RandomRotate data augmentation is used for training.
 
-## 数据准备
-### DOTA数据准备
-DOTA数据集是一个大规模的遥感图像数据集，包含旋转框和水平框的标注。可以从[DOTA数据集官网](https://captain-whu.github.io/DOTA/)下载数据集并解压，解压后的数据集目录结构如下所示：
+## Data Preparation
+### DOTA Dataset preparation
+The DOTA dataset is a large-scale remote sensing image dataset containing annotations of oriented and horizontal bounding boxes. The dataset can be download from [Official Website of DOTA Dataset](https://captain-whu.github.io/DOTA/). When the dataset is decompressed, its directory structure is shown as follows.
 ```
 ${DOTA_ROOT}
 ├── test
@@ -46,15 +44,16 @@ ${DOTA_ROOT}
     └── labelTxt
 ```
 
-对于有标注的数据，每一张图片会对应一个同名的txt文件，文件中每一行为一个旋转框的标注，其格式如下：
+For labeled data, each image corresponds to a txt file with the same name, and each row in the txt file represent a rotated bouding box. The format is as follows:
+
 ```
 x1 y1 x2 y2 x3 y3 x4 y4 class_name difficult
 ```
 
-#### 单尺度切图
-DOTA数据集分辨率较高，因此一般在训练和测试之前对图像进行离线切图，使用单尺度进行切图可以使用以下命令：
+#### Slicing data with single scale
+The image resolution of DOTA dataset is relatively high, so we usually slice the images before training and testing. To slice the images with a single scale, you can use the command below
 ``` bash
-# 对于有标注的数据进行切图
+# slicing labeled data
 python configs/rotate/tools/prepare_data.py \
     --input_dirs ${DOTA_ROOT}/train/ ${DOTA_ROOT}/val/ \
     --output_dir ${OUTPUT_DIR}/trainval1024/ \
@@ -62,8 +61,7 @@ python configs/rotate/tools/prepare_data.py \
     --subsize 1024 \
     --gap 200 \
     --rates 1.0
-
-# 对于无标注的数据进行切图需要设置--image_only
+# slicing unlabeled data by setting --image_only
 python configs/rotate/tools/prepare_data.py \
     --input_dirs ${DOTA_ROOT}/test/ \
     --output_dir ${OUTPUT_DIR}/test1024/ \
@@ -75,10 +73,10 @@ python configs/rotate/tools/prepare_data.py \
 
 ```
 
-#### 多尺度切图
-使用多尺度进行切图可以使用以下命令：
+#### Slicing data with multi scale
+To slice the images with multiple scales, you can use the command below
 ``` bash
-# 对于有标注的数据进行切图
+# slicing labeled data
 python configs/rotate/tools/prepare_data.py \
     --input_dirs ${DOTA_ROOT}/train/ ${DOTA_ROOT}/val/ \
     --output_dir ${OUTPUT_DIR}/trainval/ \
@@ -86,8 +84,7 @@ python configs/rotate/tools/prepare_data.py \
     --subsize 1024 \
     --gap 500 \
     --rates 0.5 1.0 1.5
-
-# 对于无标注的数据进行切图需要设置--image_only
+# slicing unlabeled data by setting --image_only
 python configs/rotate/tools/prepare_data.py \
     --input_dirs ${DOTA_ROOT}/test/ \
     --output_dir ${OUTPUT_DIR}/test1024/ \
@@ -98,35 +95,34 @@ python configs/rotate/tools/prepare_data.py \
     --image_only
 ```
 
-### 自定义数据集
-旋转框使用标准COCO数据格式，你可以将你的数据集转换成COCO格式以训练模型。COCO标准数据格式的标注信息中包含以下信息：
+### Custom Dataset
+Rotated object detction uses the standard COCO data format, and you can convert your dataset to COCO format to train the model. The annotations of standard COCO format contains the following information
 ``` python
 'annotations': [
     {
         'id': 2083, 'category_id': 9, 'image_id': 9008,
-        'bbox': [x, y, w, h], # 水平框标注
-        'segmentation': [[x1, y1, x2, y2, x3, y3, x4, y4]], # 旋转框标注
+        'bbox': [x, y, w, h], # horizontal bouding box
+        'segmentation': [[x1, y1, x2, y2, x3, y3, x4, y4]], # rotated bounding box
         ...
     }
     ...
 ]
 ```
-**需要注意的是`bbox`的标注是水平框标注，`segmentation`为旋转框四个点的标注(顺时针或逆时针均可)。在旋转框训练时`bbox`是可以缺省，一般推荐根据旋转框标注`segmentation`生成。** 在PaddleDetection 2.4及之前的版本，`bbox`为旋转框标注[x, y, w, h, angle]，`segmentation`缺省，**目前该格式已不再支持，请下载最新数据集或者转换成标准COCO格式**。
-
-## 安装依赖
-旋转框检测模型需要依赖外部算子进行训练，评估等。Linux环境下，你可以执行以下命令进行编译安装
+**It should be noted that `bbox` is the horizontal bouding box, and `segmentation` is four points of rotated bounding box (clockwise or counterclockwise). The `bbox` can be empty when training rotated object detector, and it is recommended to generate `bbox` according to `segmentation`**. In PaddleDetection 2.4 and earlier versions, `bbox` represents the rotated bounding box [x, y, w, h, angle] and `segmentation` is empty. **But this format is no longer supported after PaddleDetection 2.5, please download the latest dataset or convert to standard COCO format**.
+## Installation
+Models of rotated object detection depend on external operators for training, evaluation, etc. In Linux environment, you can execute the following command to compile and install.
 ```
 cd ppdet/ext_op
 python setup.py install
 ```
-Windows环境请按照如下步骤安装：
+In Windows environment, perform the following steps to install it：
 
-（1）准备Visual Studio (版本需要>=Visual Studio 2015 update3)，这里以VS2017为例；
+（1）Visual Studio (version required >= Visual Studio 2015 Update3);
 
-（2）点击开始-->Visual Studio 2017-->适用于 VS 2017 的x64本机工具命令提示；
+（2）Go to Start --> Visual Studio 2017 --> X64 native Tools command prompt for VS 2017;
 
-（3）设置环境变量：`set DISTUTILS_USE_SDK=1`
+（3）Setting Environment Variables：set DISTUTILS_USE_SDK=1
 
-（4）进入`PaddleDetection/ppdet/ext_op`目录，通过`python setup.py install`命令进行安装。
+（4）Enter `ppdet/ext_op` directory，use `python setup.py install` to install。
 
-安装完成后，可以执行`ppdet/ext_op/unittest`下的单测验证外部op是否正确安装
+After the installation, you can execute the unittest of `ppdet/ext_op/unittest` to verify whether the external oprators is installed correctly.

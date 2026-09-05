@@ -1,4 +1,3 @@
-English | [简体中文](QUICK_STARTED_cn.md)
 
 # Quick Start
 In order to enable users to experience PaddleDetection and produce models in a short time, this tutorial introduces the pipeline to get a decent object detection model by finetuning on a small dataset in 10 minutes only. In practical applications, it is recommended that users select a suitable model configuration file for their specific demand.

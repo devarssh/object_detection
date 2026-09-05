@@ -1,4 +1,3 @@
-简体中文 | [English](README_en.md)
 
 # Semi-Supervised Detection (Semi DET) 半监督检测
 

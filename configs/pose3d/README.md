@@ -1,4 +1,3 @@
-简体中文
 
   <div align="center">
     <img src="https://user-images.githubusercontent.com/31800336/219260054-ba3766b1-8223-42bf-b69b-7092019995cc.jpg" width='600'/>
@@ -79,7 +78,6 @@ ${REPO_DIR}
 |-- ppdet
 |-- deploy
 |-- demo
-|-- README_cn.md
 |-- README_en.md
 |-- ...
 ```

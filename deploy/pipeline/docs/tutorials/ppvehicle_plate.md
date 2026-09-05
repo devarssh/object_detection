@@ -1,22 +1,25 @@
-[English](ppvehicle_plate_en.md) | 简体中文
 
-# PP-Vehicle车牌识别模块
+# PP-Vehicle License Plate Recognition Modules
 
-车牌识别，在车辆应用场景中有着非常广泛的应用，起到车辆身份识别的作用，比如车辆出入口自动闸机。PP-Vehicle中提供了车辆的跟踪及其车牌识别的功能，并提供模型下载：
+License plate recognition has a very wide range of applications with vehicle identification functions, such as automatic vehicle entrance/exit gates.
 
-| 任务                 | 算法 | 精度 | 预测速度(ms) |预测模型下载链接                                                                               |
-|:---------------------|:---------:|:------:|:------:| :---------------------------------------------------------------------------------: |
-| 车辆检测/跟踪 |  PP-YOLOE-l | mAP: 63.9 | - |[下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_ppvehicle.zip) |
-| 车牌检测模型    |  ch_PP-OCRv3_det  |  hmean: 0.979  | - | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/ch_PP-OCRv3_det_infer.tar.gz) |
-| 车牌识别模型    |  ch_PP-OCRv3_rec  |  acc: 0.773  | - | [下载链接](https://bj.bcebos.com/v1/paddledet/models/pipeline/ch_PP-OCRv3_rec_infer.tar.gz) |
-1. 跟踪模型使用PPVehicle数据集（整合了BDD100K-MOT和UA-DETRAC），是将BDD100K-MOT中的car, truck, bus, van和UA-DETRAC中的car, bus, van都合并为1类vehicle(1)后的数据集。
-2. 车牌检测、识别模型使用PP-OCRv3模型在CCPD2019、CCPD2020混合车牌数据集上fine-tune得到。
+PP-Vehicle supports vehicle tracking and license plate recognition. Models are available for download:
 
-## 使用方法
+| Task                       | Algorithm       | Accuracy     | Inference speed(ms) | Model Download                                                                             |
+|:-------------------------- |:---------------:|:------------:|:-------------------:|:------------------------------------------------------------------------------------------:|
+| Vehicle Detection/Tracking | PP-YOLOE-l      | mAP: 63.9    | -                   | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/mot_ppyoloe_l_36e_ppvehicle.zip) |
+| Vehicle Detection Model    | ch_PP-OCRv3_det | hmean: 0.979 | -                   | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/ch_PP-OCRv3_det_infer.tar.gz)    |
+| Vehicle Detection Model    | ch_PP-OCRv3_rec | acc: 0.773   | -                   | [Link](https://bj.bcebos.com/v1/paddledet/models/pipeline/ch_PP-OCRv3_rec_infer.tar.gz)    |
 
-1. 从上表链接中下载模型并解压到```PaddleDetection/output_inference```路径下，并修改配置文件中模型路径，也可默认自动下载模型。设置```deploy/pipeline/config/infer_cfg_ppvehicle.yml```中`VEHICLE_PLATE`的enable: True
+1. The tracking model uses the PPVehicle dataset ( which integrates BDD100K-MOT and UA-DETRAC). The dataset merged car, truck, bus, van from BDD100K-MOT and car, bus, van from UA-DETRAC all into 1 class vehicle(1).
+2. License plate detection and recognition models were obtained from fine-tuned PP-OCRv3 model on the CCPD2019 and CCPD2020 mixed license plate datasets.
 
-`infer_cfg_ppvehicle.yml`中配置项说明：
+## How to Use
+
+1. Download models from the above table and unzip it to```PaddleDetection/output_inference```, and modify the model path in the configuration file. Models can also be downloaded automatically by default: Set  enable: True of `VEHICLE_PLATE` in `deploy/pipeline/config/infer_cfg_ppvehicle.yml`
+
+Config Description of `infer_cfg_ppvehicle.yml`：
+
 ```
 VEHICLE_PLATE:                                                            #模块名称
   det_model_dir: output_inference/ch_PP-OCRv3_det_infer/                  #车牌检测模型路径
@@ -30,59 +33,56 @@ VEHICLE_PLATE:                                                            #模�
   enable: False                                                           #功能是否开启
 ```
 
-2. 图片输入时，启动命令如下(更多命令参数说明，请参考[快速开始-参数说明](./PPVehicle_QUICK_STARTED.md#41-参数说明))。
-```python
-#单张图片
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
+2. For picture input, the start command is as follows (for more descriptions of the command parameters, please refer to [Quick Start - Parameter Description](. /PPVehicle_QUICK_STARTED.md#41-parameter description)).
+
+   ```python
+   #Single image
+   python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --image_file=test_image.jpg \
                                                    --device=gpu \
+   #Image folder
+   python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
+    --image_dir=images/ \
+    --device=gpu \
+   ```
 
-#图片文件夹
-python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
-                                                   --image_dir=images/ \
-                                                   --device=gpu \
+3. For video input, the start command is as follows
 
-```
-
-3. 视频输入时，启动命令如下
-```python
-#单个视频文件
+```bash
+#Single video
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --video_file=test_video.mp4 \
                                                    --device=gpu \
 
-#视频文件夹
+#Video folder
 python deploy/pipeline/pipeline.py --config deploy/pipeline/config/infer_cfg_ppvehicle.yml \
                                                    --video_dir=test_videos/ \
                                                    --device=gpu \
 ```
 
-4. 若修改模型路径，有以下两种方式：
+4. There are two ways to modify the model path
 
-    - 方法一：```./deploy/pipeline/config/infer_cfg_ppvehicle.yml```下可以配置不同模型路径，车牌识别模型修改`VEHICLE_PLATE`字段下配置
-    - 方法二：命令行中--config配置项后面增加`-o VEHICLE_PLATE.det_model_dir=[YOUR_DETMODEL_PATH] VEHICLE_PLATE.rec_model_dir=[YOUR_RECMODEL_PATH]`修改模型路径。
+   - Config different model path in ```./deploy/pipeline/config/infer_cfg_ppvehicle.yml```, and modify`VEHICLE_PLATE`field to config license plate recognition model modification
+   - **[Recommand]** Add`-o VEHICLE_PLATE.det_model_dir=[YOUR_DETMODEL_PATH] VEHICLE_PLATE.rec_model_dir=[YOUR_RECMODEL_PATH]` to config file in command line.
 
-
-测试效果如下：
+The test results are as follows:
 
 <div width="600" align="center">
   <img src="../images/ppvehicleplate.jpg"/>
 </div>
 
+## Solutions
 
-## 方案说明
+2. By using the coordinates of the vehicle detection frame, each vehicle's image is intercepted in the input image
+3. Use the license plate detection model to identify the location of the license plate in each vehicle screenshot as well as the license plate area. The PP-OCRv3_det model is adopted as the solution, obtained from fine-tuned CCPD dataset in terms of number plate.
+4. Use a character recognition model to identify characters in a number plate. The PP-OCRv3_det model is adopted as the solution, obtained from fine-tuned CCPD dataset in terms of number plate.
 
-1. 目标检测/多目标跟踪获取图片/视频输入中的车辆检测框，模型方案为PP-YOLOE，详细文档参考[PP-YOLOE](../../../configs/ppyoloe/README_cn.md)
-2. 通过车辆检测框的坐标在输入图像中截取每个车辆
-3. 使用车牌检测模型在每张车辆截图中识别车牌所在位置，同理截取车牌区域，模型方案为PP-OCRv3_det模型，经CCPD数据集在车牌场景fine-tune得到。
-4. 使用字符识别模型识别车牌中的字符。模型方案为PP-OCRv3_rec模型，经CCPD数据集在车牌场景fine-tune得到。
+**Performance optimization measures：**
 
-**性能优化措施：**
+1. Use a frame skipping strategy to detect license plates every 10 frames to reduce the computing workload.
+2. Use the license plate result stabilization strategy to avoid the volatility of single frame results; use all historical license plate recognition results of the same id to gain the most likely result for that id.
 
-1. 使用跳帧策略，每10帧做一次车牌检测，避免每帧做车牌检测的算力消耗。
-2. 车牌结果稳定策略，避免单帧结果的波动，利用同一个id的历史所有车牌识别结果进行投票，得到该id最大可能的正确结果。
+## Reference
 
-## 参考资料
-
-1. PaddeDetection特色检测模型[PP-YOLOE](../../../../configs/ppyoloe)。
-2. Paddle字符识别模型库[PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)。
+1. PaddeDetection featured detection model PP-YOLOE](../../../../configs/ppyoloe)。
+2. Paddle OCR Model Library [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)。

@@ -1,4 +1,3 @@
-简体中文 | [English](README.md)
 
 ## PP-YOLOE Vehicle 检测模型
 
@@ -40,7 +39,6 @@ vehicle
 
 ## YOLOv3 Vehicle 检测模型
 
-请参考[Vehicle_YOLOv3页面](./vehicle_yolov3/README_cn.md)
 
 ## PP-OCRv3 车牌识别模型
 

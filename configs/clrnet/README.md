@@ -1,4 +1,3 @@
-English | [简体中文](README_cn.md)
 
 # CLRNet (CLRNet: Cross Layer Refinement Network for Lane Detection)
 

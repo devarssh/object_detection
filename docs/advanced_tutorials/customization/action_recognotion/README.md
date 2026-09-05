@@ -1,54 +1,54 @@
-简体中文 | [English](./README_en.md)
 
-# 行为识别任务二次开发
+# Secondary Development for Action Recognition Task
 
-在产业落地过程中应用行为识别算法，不可避免地会出现希望自定义类型的行为识别的需求，或是对已有行为识别模型的优化，以提升在特定场景下模型的效果。鉴于行为的多样性，PP-Human支持抽烟、打电话、摔倒、打架、人员闯入五种异常行为识别，并根据行为的不同，集成了基于视频分类、基于检测、基于图像分类、基于跟踪以及基于骨骼点的五种行为识别技术方案，可覆盖90%+动作类型的识别，满足各类开发需求。我们在本文档通过案例来介绍如何根据期望识别的行为来进行行为识别方案的选择，以及使用PaddleDetection进行行为识别算法二次开发工作，包括：方案选择、数据准备、模型优化思路和新增行为的开发流程。
+In the process of industrial implementation, the application of action recognition algorithms will inevitably lead to the need for customized types of action, or the optimization of existing action recognition models to improve the performance of the model in specific scenarios. In view of the diversity of behaviors, PP-Human supports the identification of five abnormal behavioras of smoking, making phone calls, falling, fighting, and people intrusion. At the same time, according to the different behaviors, PP-Human integrates five action recognition technology solutions based on video classification, detection-based, image-based classification, tracking-based and skeleton-based, which can cover 90%+ action type recognition and meet various development needs. In this document, we use a case to introduce how to select a action recognition solution according to the expected behavior, and use PaddleDetection to carry out the secondary development of the action recognition algorithm, including: solution selection, data preparation, model optimization and development process for adding new actions.
 
 
-## 方案选择
-
-在PaddleDetection的PP-Human中，我们为行为识别提供了多种方案：基于视频分类、基于图像分类、基于检测、基于跟踪以及基于骨骼点的行为识别方案，以期望满足不同场景、不同目标行为的需求。对于二次开发，首先我们需要确定要采用何种方案来实现行为识别的需求，其核心是要通过对场景和具体行为的分析、并考虑数据采集成本等因素，综合选择一个合适的识别方案。我们在这里简要列举了当前PaddleDetection中所支持的方案的优劣势和适用场景，供大家参考。
+## Solution Selection
+In PaddleDetection's PP-Human, we provide a variety of solutions for behavior recognition: video classification, image classification, detection, tracking-based, and skeleton point-based behavior recognition solutions, in order to meet the needs of different scenes and different target behaviors.
 
 <img width="1091" alt="image" src="https://user-images.githubusercontent.com/22989727/178742352-d0c61784-3e93-4406-b2a2-9067f42cb343.png">
 
-下面以PaddleDetection目前已经支持的几个具体动作为例，介绍每个动作方案的选型依据：
+The following takes several specific actions that PaddleDetection currently supports as an example to introduce the selection basis of each action:
 
-### 吸烟
+### Smoking
 
-方案选择：基于人体id检测的行为识别
+Solution selection: action recognition based on detection with human id.
 
-原因：吸烟动作中具有香烟这个明显特征目标，因此我们可以认为当在某个人物的对应图像中检测到香烟时，该人物即在吸烟动作中。相比于基于视频或基于骨骼点的识别方案，训练检测模型需要采集的是图片级别而非视频级别的数据，可以明显减轻数据收集与标注的难度。此外，目标检测任务具有丰富的预训练模型资源，整体模型的效果会更有保障，
+Reason: The smoking action has a obvious feature target, that is, cigarette. So we can think that when a cigarette is detected in the corresponding image of a person, the person is with the smoking action. Compared with video-based or skeleton-based recognition schemes, training detection model needs to collect data at the image level rather than the video level, which can significantly reduce the difficulty of data collection and labeling. In addition, the detection task has abundant pre-training model resources, and the performance of the model will be more guaranteed.
 
-### 打电话
+### Making Phone Calls
 
-方案选择：基于人体id分类的行为识别
+Solution selection: action recognition based on classification with human id.
 
-原因：打电话动作中虽然有手机这个特征目标，但为了区分看手机等动作，以及考虑到在安防场景下打电话动作中会出现较多对手机的遮挡（如手对手机的遮挡、人头对手机的遮挡等等），不利于检测模型正确检测到目标。同时打电话通常持续的时间较长，且人物本身的动作不会发生太大变化，因此可以因此采用帧级别图像分类的策略。
-    此外，打电话这个动作主要可以通过上半身判别，可以采用半身图片，去除冗余信息以降低模型训练的难度。
-
-### 摔倒
-
-方案选择：基于人体骨骼点的行为识别
-
-原因：摔倒是一个明显的时序行为的动作，可由一个人物本身进行区分，具有场景无关的特性。由于PP-Human的场景定位偏向安防监控场景，背景变化较为复杂，且部署上需要考虑到实时性，因此采用了基于骨骼点的行为识别方案，以获得更好的泛化性及运行速度。
-
-### 闯入
-
-方案选择：基于人体id跟踪的行为识别
-
-原因：闯入识别判断行人的路径或所在位置是否在某区域内即可，与人体自身动作无关，因此只需要跟踪人体跟踪结果分析是否存在闯入行为。
-
-### 打架
-
-方案选择：基于视频分类的行为识别
-
-原因：与上面的动作不同，打架是一个典型的多人组成的行为。因此不再通过检测与跟踪模型来提取行人及其ID，而对整体视频片段进行处理。此外，打架场景下各个目标间的互相遮挡极为严重，关键点识别的准确性不高，采用基于骨骼点的方案难以保证精度。
+Reason: Although there is a characteristic target of a mobile phone in the call action, in order to distinguish actions such as looking at the mobile phone, and considering that there will be much occlusion of the mobile phone in the calling action in the security scene (such as the occlusion of the mobile phone by the hand or head, etc.), is not conducive to the detection model to correctly detect the target. Simultaneous, calls usually last a long time, and the character's action do not change much, so a strategy for frame-level image classification can therefore be employed. In addition, the action of making a phone call can mainly be judged by the upper body, and the half-body picture can be used to remove redundant information to reduce the difficulty of model training.
 
 
-下面详细展开五大类方案的数据准备、模型优化和新增行为识别方法
+### Falling
 
-1. [基于人体id检测的行为识别](./idbased_det.md)
-2. [基于人体id分类的行为识别](./idbased_clas.md)
-3. [基于人体骨骼点的行为识别](./skeletonbased_rec.md)
-4. [基于人体id跟踪的行为识别](../pphuman_mot.md)
-5. [基于视频分类的行为识别](./videobased_rec.md)
+Solution selection: action recognition based on skelenton.
+
+Reason: Falling is an obvious temporal action, which is distinguishable by a character himself, and it is scene-independent. Since PP-Human is towards the security monitoring scene, where the background changes are more complicated, and the real-time inference needs to be considered in the deployment, the action recognition based on skeleton points is adopted to obtain better generalization and running speed.
+
+
+### People Intrusion
+
+Solution selection: action recognition based on tracking with human id.
+
+Reason: The intrusion recognition can be judged by whether the pedestrian's path or location is in a selected area, and it is unrelated to pedestrian's body action. Therefore, it is only necessary to track the human and use coordinate results to analyze whether there is intrusion behavior.
+
+### Fighting
+
+Solution selection: action recognition based on video classification.
+
+Reason: Unlike the actions above, fighting is a typical multiplayer action. Therefore, the detection and tracking model is no longer used to extract pedestrians and their IDs, but the entire video clip is processed. In addition, the mutual occlusion between various targets in the fighting scene is extremely serious, leading to the accuracy of keypoint recognition is not good.
+
+
+
+The following are detailed description for the five major categories of solutions, including the data preparation, model optimization and adding new actions.
+
+1. [action recognition based on detection with human id.](./idbased_det_en.md)
+2. [action recognition based on classification with human id.](./idbased_clas_en.md)
+3. [action recognition based on skelenton.](./skeletonbased_rec_en.md)
+4. [action recognition based on tracking with human id](../pphuman_mot_en.md)
+5. [action recognition based on video classification](./videobased_rec_en.md)

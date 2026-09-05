@@ -1,84 +1,84 @@
-# RCNN系列模型参数配置教程
+# RCNN series model parameter configuration tutorial
 
-标签： 模型参数配置
+Tag: Model parameter configuration
 
-以`faster_rcnn_r50_fpn_1x_coco.yml`为例，这个模型由五个子配置文件组成：
+Take `faster_rcnn_r50_fpn_1x_coco.yml` as an example. The model consists of five sub-profiles:
 
-- 数据配置文件 `coco_detection.yml`
+- Data profile `coco_detection.yml`
 
 ```yaml
-# 数据评估类型
+# Data evaluation type
 metric: COCO
-# 数据集的类别数
+# The number of categories in the dataset
 num_classes: 80
 
 # TrainDataset
 TrainDataset:
   !COCODataSet
-    # 图像数据路径，相对 dataset_dir 路径，os.path.join(dataset_dir, image_dir)
+    # Image data path, Relative path of dataset_dir, os.path.join(dataset_dir, image_dir)
     image_dir: train2017
-    # 标注文件路径，相对 dataset_dir 路径，os.path.join(dataset_dir, anno_path)
+    # Annotation file path, Relative path of dataset_dir, os.path.join(dataset_dir, anno_path)
     anno_path: annotations/instances_train2017.json
-    # 数据文件夹
+    # data file
     dataset_dir: dataset/coco
     # data_fields
     data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
 
 EvalDataset:
   !COCODataSet
-    # 图像数据路径，相对 dataset_dir 路径，os.path.join(dataset_dir, image_dir)
+    # Image data path, Relative path of dataset_dir, os.path.join(dataset_dir, image_dir)
     image_dir: val2017
-    # 标注文件路径，相对 dataset_dir 路径，os.path.join(dataset_dir, anno_path)
+    # Annotation file path, Relative path of dataset_dir, os.path.join(dataset_dir, anno_path)
     anno_path: annotations/instances_val2017.json
-    # 数据文件夹
+    # data file file os.path.join(dataset_dir, anno_path)
     dataset_dir: dataset/coco
 
 TestDataset:
   !ImageFolder
-    # 标注文件路径，相对 dataset_dir 路径，os.path.join(dataset_dir, anno_path)
+    # Annotation file path, Relative path of dataset_dir, os.path.join(dataset_dir, anno_path)
     anno_path: annotations/instances_val2017.json
 ```
 
-- 优化器配置文件 `optimizer_1x.yml`
+- Optimizer configuration file `optimizer_1x.yml`
 
 ```yaml
-# 总训练轮数
+# Total training epoches
 epoch: 12
 
-# 学习率设置
+# learning rate setting
 LearningRate:
-  # 默认为8卡训学习率
+  # Default is 8 Gpus training learning rate
   base_lr: 0.01
-  # 学习率调整策略
+  # Learning rate adjustment strategy
   schedulers:
   - !PiecewiseDecay
     gamma: 0.1
-    # 学习率变化位置(轮数)
+    # Position of change in learning rate (number of epoches)
     milestones: [8, 11]
   - !LinearWarmup
     start_factor: 0.1
     steps: 1000
 
-# 优化器
+# Optimizer
 OptimizerBuilder:
-  # 优化器
+  # Optimizer
   optimizer:
     momentum: 0.9
     type: Momentum
-  # 正则化
+  # Regularization
   regularizer:
     factor: 0.0001
     type: L2
 ```
 
-- 数据读取配置文件 `faster_fpn_reader.yml`
+- Data reads configuration files `faster_fpn_reader.yml`
 
 ```yaml
-# 每张GPU reader进程个数
+# Number of PROCESSES per GPU Reader
 worker_num: 2
-# 训练数据
+# training data
 TrainReader:
-  # 训练数据transforms
+  # Training data transforms
   sample_transforms:
   - Decode: {}
   - RandomResize: {target_size: [[640, 1333], [672, 1333], [704, 1333], [736, 1333], [768, 1333], [800, 1333]], interp: 2, keep_ratio: True}
@@ -86,60 +86,60 @@ TrainReader:
   - NormalizeImage: {is_scale: true, mean: [0.485,0.456,0.406], std: [0.229, 0.224,0.225]}
   - Permute: {}
   batch_transforms:
-  # 由于模型存在FPN结构，输入图片需要padding为32的倍数
+  # Since the model has FPN structure, the input image needs a multiple of 32 padding
   - PadBatch: {pad_to_stride: 32}
-  # 训练时batch_size
+  # Batch_size during training
   batch_size: 1
-  # 读取数据是否乱序
+  # Read data is out of order
   shuffle: true
-  # 是否丢弃最后不能完整组成batch的数据
+  # Whether to discard data that does not complete the batch
   drop_last: true
-  # 表示reader是否对gt进行组batch的操作，在rcnn系列算法中设置为false，得到的gt格式为list[Tensor]
+  # Set it to false. Then you have a sequence of values for GT: List [Tensor]
   collate_batch: false
 
-# 评估数据
+# Evaluate data
 EvalReader:
-  # 评估数据transforms
+  # Evaluate data transforms
   sample_transforms:
   - Decode: {}
   - Resize: {interp: 2, target_size: [800, 1333], keep_ratio: True}
   - NormalizeImage: {is_scale: true, mean: [0.485,0.456,0.406], std: [0.229, 0.224,0.225]}
   - Permute: {}
   batch_transforms:
-  # 由于模型存在FPN结构，输入图片需要padding为32的倍数
+  # Since the model has FPN structure, the input image needs a multiple of 32 padding
   - PadBatch: {pad_to_stride: 32}
-  # 评估时batch_size
+  # batch_size of evaluation
   batch_size: 1
-  # 读取数据是否乱序
+  # Read data is out of order
   shuffle: false
-  # 是否丢弃最后不能完整组成batch的数据
+  # Whether to discard data that does not complete the batch
   drop_last: false
 
-# 测试数据
+# test data
 TestReader:
-  # 测试数据transforms
+  # test data transforms
   sample_transforms:
   - Decode: {}
   - Resize: {interp: 2, target_size: [800, 1333], keep_ratio: True}
   - NormalizeImage: {is_scale: true, mean: [0.485,0.456,0.406], std: [0.229, 0.224,0.225]}
   - Permute: {}
   batch_transforms:
-  # 由于模型存在FPN结构，输入图片需要padding为32的倍数
+  # Since the model has FPN structure, the input image needs a multiple of 32 padding
   - PadBatch: {pad_to_stride: 32}
-  # 测试时batch_size
+  # batch_size of test
   batch_size: 1
-  # 读取数据是否乱序
+  # Read data is out of order
   shuffle: false
-  # 是否丢弃最后不能完整组成batch的数据
+  # Whether to discard data that does not complete the batch
   drop_last: false
 ```
 
-- 模型配置文件 `faster_rcnn_r50_fpn.yml`
+- Model profile `faster_rcnn_r50_fpn.yml`
 
 ```yaml
-# 模型结构类型
+# Model structure type
 architecture: FasterRCNN
-# 预训练模型地址
+# Pretrain model address
 pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/ResNet50_cos_pretrained.pdparams
 
 # FasterRCNN
@@ -160,7 +160,7 @@ FasterRCNN:
 ResNet:
   # index 0 stands for res2
   depth: 50
-  # norm_type，可设置参数：bn 或 sync_bn
+  # norm_type, Configurable parameter: bn or sync_bn
   norm_type: bn
   # freeze_at index, 0 represent res2
   freeze_at: 0
@@ -188,14 +188,14 @@ RPNHead:
     negative_overlap: 0.3
     positive_overlap: 0.7
     use_random: True
-  # 训练时生成proposal的参数
+  # The parameters of the proposal are generated during training
   train_proposal:
     min_size: 0.0
     nms_thresh: 0.7
     pre_nms_top_n: 2000
     post_nms_top_n: 1000
     topk_after_collect: True
-  # 评估时生成proposal的参数
+  # The parameters of the proposal are generated during evaluation
   test_proposal:
     min_size: 0.0
     nms_thresh: 0.7
@@ -218,28 +218,28 @@ BBoxHead:
 BBoxAssigner:
   # batch_size_per_im
   batch_size_per_im: 512
-  # 背景阈值
+  # Background the threshold
   bg_thresh: 0.5
-  # 前景阈值
+  # Prospects for threshold
   fg_thresh: 0.5
-  # 前景比例
+  # Prospects of proportion
   fg_fraction: 0.25
-  # 是否随机采样
+  # Random sampling
   use_random: True
 
 # TwoFCHead
 TwoFCHead:
-  # TwoFCHead特征维度
+  # TwoFCHead feature dimension
   out_channel: 1024
 
 
 # BBoxPostProcess
 BBoxPostProcess:
-  # 解码
+  # decode
   decode: RCNNBox
   # nms
   nms:
-    # 使用MultiClassNMS
+    # use MultiClassNMS
     name: MultiClassNMS
     keep_top_k: 100
     score_threshold: 0.05
@@ -247,15 +247,15 @@ BBoxPostProcess:
 
 ```
 
-- 运行时置文件 `runtime.yml`
+- runtime configuration file `runtime.yml`
 
 ```yaml
-# 是否使用gpu
+# Whether to use gpu
 use_gpu: true
-# 日志打印间隔
+# Log Printing interval
 log_iter: 20
 # save_dir
 save_dir: output
-# 模型保存间隔时间
+# Model save interval
 snapshot_epoch: 1
 ```

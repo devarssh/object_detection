@@ -1,82 +1,93 @@
-简体中文 | [English](./keypoint_detection_en.md)
 
-# 关键点检测任务二次开发
+# Customized Keypoint Detection
 
-在实际场景中应用关键点检测算法，不可避免地会出现需要二次开发的需求。包括对目前的预训练模型效果不满意，希望优化模型效果；或是目前的关键点点位定义不能满足实际场景需求，希望新增或是替换关键点点位的定义，训练新的关键点模型。本文档将介绍如何在PaddleDetection中，对关键点检测算法进行二次开发。
+When applying keypoint detection algorithms in real practice, inevitably, we may need customization as we may dissatisfy with the current pre-trained model results, or the current keypoint detection cannot meet the actual demand, or we may want to add or replace the definition of keypoints and train a new keypoint detection model. This document will introduce how to customize the keypoint detection algorithm in PaddleDetection.
 
-## 数据准备
+## Data Preparation
 
-### 基本流程说明
-在PaddleDetection中，目前支持的标注数据格式为`COCO`和`MPII`。这两个数据格式的详细说明，可以参考文档[关键点数据准备](../../tutorials/data/PrepareKeypointDataSet.md)。在这一步中，通过使用Labeme等标注工具，依照特征点序号标注对应坐标。并转化成对应可训练的标注格式。建议使用`COCO`格式进行。
+### Basic Process Description
 
-### 合并数据集
-为了扩展使用的训练数据，合并多个不同的数据集一起训练是一个很直观的解决手段，但不同的数据集往往对关键点的定义并不一致。合并数据集的第一步是需要统一不同数据集的点位定义，确定标杆点位，即最终模型学习的特征点类型，然后根据各个数据集的点位定义与标杆点位定义之间的关系进行调整。
-- 在标杆点位中的点：调整点位序号，使其与标杆点位一致
-- 未在标杆点位中的点：舍去
-- 数据集缺少标杆点位中的点：对应将标注的标志位记为“未标注”
+PaddleDetection currently supports `COCO` and `MPII` annotation data formats. For detailed descriptions of these two data formats, please refer to the document [Keypoint Data Preparation](./../tutorials/data/PrepareKeypointDataSet.md). In this step, by using annotation tools such as Labeme, the corresponding coordinates are annotated according to the feature point serial numbers and then converted into the corresponding trainable annotation format. And we recommend `COCO` format.
 
-在[关键点数据准备](../../tutorials/data/PrepareKeypointDataSet.md)中，提供了如何合并`COCO`数据集和`AI Challenger`数据集，并统一为以`COCO`为标杆点位定义的案例说明，供参考。
+### Merging datasets
 
+To extend the training data, we can merge several different datasets together. But different datasets often have different definitions of key points. Therefore, the first step in merging datasets is to unify the point definitions of different datasets, and determine the benchmark points, i.e., the types of feature points finally learned by the model, and then adjust them according to the relationship between the point definitions of each dataset and the benchmark point definitions.
 
-## 模型优化
+- Points in the benchmark point location: adjust the point number to make it consistent with the benchmark point location
+- Points that are not in the benchmark points: discard
+- Points in the dataset that are missing from the benchmark: annotate the marked points as "unannotated".
 
-### 检测-跟踪模型优化
-在PaddleDetection中，关键点检测能力支持Top-Down、Bottom-Up两套方案，Top-Down先检测主体，再检测局部关键点，优点是精度较高，缺点是速度会随着检测对象的个数增加，Bottom-Up先检测关键点再组合到对应的部位上，优点是速度快，与检测对象个数无关，缺点是精度较低。关于两种方案的详情及对应模型，可参考[关键点检测系列模型](../../../configs/keypoint/README.md)
+In [Key point data preparation](... /... /tutorials/data/PrepareKeypointDataSet.md), we provide a case illustration of how to merge the `COCO` dataset and the `AI Challenger` dataset and unify them as a benchmark point definition with `COCO` for your reference.
 
-当使用Top-Down方案时，模型效果依赖于前序的检测和跟踪效果，如果实际场景中不能准确检测到行人位置，会使关键点检测部分表现受限。如果在实际使用中遇到了上述问题，请参考[目标检测任务二次开发](./detection.md)以及[多目标跟踪任务二次开发](./pphuman_mot.md)对检测/跟踪模型进行优化。
+## Model Optimization
 
-### 使用符合场景的数据迭代
-目前发布的关键点检测算法模型主要在`COCO`/ `AI Challenger`等开源数据集上迭代，这部分数据集中可能缺少与实际任务较为相似的监控场景（视角、光照等因素）、体育场景（存在较多非常规的姿态）。使用更符合实际任务场景的数据进行训练，有助于提升模型效果。
+### Detection and tracking model optimization
 
-### 使用预训练模型迭代
-关键点模型的数据的标注复杂度较大，直接使用模型从零开始在业务数据集上训练，效果往往难以满足需求。在实际工程中使用时，建议加载已经训练好的权重，通常能够对模型精度有较大提升，以`HRNet`为例，使用方法如下：
-```bash
-python tools/train.py -c configs/keypoint/hrnet/hrnet_w32_256x192.yml -o pretrain_weights=https://paddledet.bj.bcebos.com/models/keypoint/hrnet_w32_256x192.pdparams
+In PaddleDetection, the keypoint detection supports Top-Down and Bottom-Up solutions. Top-Down first detects the main body and then detects the local key points. It has higher accuracy but will take a longer time as the number of detected objects increases.The Bottom-Up plan first detects the keypoints and then combines them with the corresponding parts. It is fast and its speed is independent of the number of detected objects. Its disadvantage is that the accuracy is relatively low. For details of the two solutions and the corresponding models, please refer to [Keypoint Detection Series Models](../../../configs/keypoint/README.md)
+
+When using the Top-Down solution, the model's effects depend on the previous detection or tracking effect. If the pedestrian position cannot be accurately detected in the actual practice, the performance of the keypoint detection will be limited. If you encounter the above problem in actual application, please refer to [Customized Object Detection](./detection_en.md) and [Customized Multi-target tracking](./pphuman_mot_en.md) for optimization of the detection and tracking model.
+
+### Iterate with scenario-compatible data
+
+The currently released keypoint detection algorithm models are mainly iterated on open source datasets such as `COCO`/ `AI Challenger`, which may lack surveillance scenarios (angles, lighting and other factors), sports scenarios (more unconventional poses) that are more similar to the actual task. Training with data that more closely matches the actual task scenario can help improve the model's results.
+
+### Iteration via pre-trained models
+
+The data annotation of the keypoint model is complex, and using the model directly to train on the business dataset from scratch is often difficult to meet the demand. When used in practical projects, it is recommended to load the pre-trained weights, which usually improve the model accuracy significantly. Let's take `HRNet` as an example  with the following method:
+
 ```
-在加载预训练模型后，可以适当减小初始学习率和最终迭代轮数, 建议初始学习率取默认配置值的1/2至1/5，并可开启`--eval`观察迭代过程中AP值的变化。
+python tools/train.py \
+        -c configs/keypoint/hrnet/hrnet_w32_256x192.yml \
+        -o pretrain_weights=https://paddledet.bj.bcebos.com/models/keypoint/hrnet_w32_256x192.pdparams
+```
 
+After loading the pre-trained model, the initial learning rate and the rounds of iterations can be reduced appropriately. It is recommended that the initial learning rate be 1/2 to 1/5 of the default configuration, and you can enable`--eval` to observe the change of AP values during the iterations.
 
-### 遮挡数据增强
-关键点任务中有较多遮挡问题，包括自身遮挡与不同目标之间的遮挡。
+## Data augmentation with occlusion
 
-1. 检测模型优化（仅针对Top-Down方案）
+There are a lot of data in occlusion in keypoint tasks, including self-covered objects and occlusion between different objects.
 
-参考[目标检测任务二次开发](./detection.md)，提升检测模型在复杂场景下的效果。
+1. Detection model optimization (only for Top-Down solutions)
 
-2. 关键点数据增强
+Refer to [Target Detection Task Secondary Development](. /detection.md) to improve the detection model in complex scenarios.
 
-在关键点模型训练中增加遮挡的数据增强，参考[PP-TinyPose](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/configs/keypoint/tiny_pose/tinypose_256x192.yml#L100)。有助于模型提升这类场景下的表现。
+2. Keypoint data augmentation
 
-### 对视频预测进行平滑处理
-关键点模型是在图片级别的基础上进行训练和预测的，对于视频类型的输入也是将视频拆分为帧进行预测。帧与帧之间虽然内容大多相似，但微小的差异仍然可能导致模型的输出发生较大的变化，表现为虽然预测的坐标大体正确，但视觉效果上有较大的抖动问题。通过添加滤波平滑处理，将每一帧预测的结果与历史结果综合考虑，得到最终的输出结果，可以有效提升视频上的表现。该部分内容可参考[滤波平滑处理](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/python/det_keypoint_unite_infer.py#L206)。
+Augmentation of covered data in keypoint model training to improve model performance in such scenarios, please refer to [PP-TinyPose](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.4/configs/keypoint/tiny_pose/)
 
+### Smooth video prediction
 
-## 新增或修改关键点点位定义
+The keypoint model is trained and predicted on the basis of image, and video input is also predicted by splitting the video into frames. Although the content is mostly similar between frames, small differences may still lead to large changes in the output of the model. As a result of that, although the predicted coordinates are roughly correct, there may be jitters in the visual effect.
 
-### 数据准备
-根据前述说明，完成数据的准备，放置于`{root of PaddleDetection}/dataset`下。
+By adding a smoothing filter process, the performance of the video output can be effectively improved by combining the predicted results of each frame and the historical results. For this part, please see [Filter Smoothing](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/deploy/python/det_keypoint_unite_infer.py#L206).
+
+## Add or modify keypoint definition
+
+### Data Preparation
+
+Complete the data preparation according to the previous instructions and place it under `{root of PaddleDetection}/dataset`.
 
 <details>
-<summary><b> 标注文件示例</b></summary>
-
-一个标注文件示例如下：
+<summary><b> Examples of annotation file</b></summary>
 
 ```
 self_dataset/
-├── train_coco_joint.json  # 训练集标注文件
-├── val_coco_joint.json    # 验证集标注文件
-├── images/                # 存放图片文件
+├── train_coco_joint.json # training set annotation file
+├── val_coco_joint.json # Validation set annotation file
+├── images/ # Store the image files
     ├── 0.jpg
     ├── 1.jpg
     ├── 2.jpg  
 ```
-其中标注文件中需要注意的改动如下：
-```json
+
+Notable changes as follows:
+
+```
 {
     "images": [
         {
             "file_name": "images/0.jpg",
-            "id": 0,       # 图片id，注意不可重复
+            "id": 0, # image id, id cannotdo not repeat
             "height": 1080,
             "width": 1920
         },
@@ -99,14 +110,14 @@ self_dataset/
             "supercategory": "person",
             "id": 1,
             "name": "person",
-            "keypoints": [   # 点位序号的名称
+            "keypoints": [ # the name of the point serial number
                 "point1",
                 "point2",
                 "point3",
                 "point4",
                 "point5",
             ],
-            "skeleton": [    # 点位构成的骨骼, 训练中非必要
+            "skeleton": [ # Skeleton composed of points, not necessary for training
                 [
                     1,
                     2
@@ -129,22 +140,22 @@ self_dataset/
     "annotations": [
         {
             {
-            "category_id": 1, # 实例所属类别
-            "num_keypoints": 3, # 该实例已标注点数量
-            "bbox": [         # 检测框位置,格式为x, y, w, h
+            "category_id": 1, # The category to which the instance belongs
+            "num_keypoints": 3, # the number of marked points of the instance
+              "bbox": [         # location of detection box,format is x, y, w, h
                 799,
                 575,
                 55,
                 185
             ],
-            # N*3 的列表，内容为x, y, v。
+            # N*3 list of x, y, v.
             "keypoints": [  
                 807.5899658203125,
                 597.5455322265625,
                 2,
                 0,  
                 0,
-                0,            # 未标注的点记为0，0，0
+                0, # unlabeled points noted as 0, 0, 0
                 805.8563232421875,
                 592.3446655273438,
                 2,
@@ -155,107 +166,92 @@ self_dataset/
                 0,
                 0
             ]
-            "id": 1,      # 实例id，不可重复
-            "image_id": 8,  # 实例所在图像的id，可重复。此时代表一张图像上存在多个目标
-            "iscrowd": 0,   # 是否遮挡，为0时参与训练
-            "area": 10175   # 实例所占面积，可简单取为w * h。注意为0时会跳过，过小时在eval时会被忽略
+            "id": 1, # the id of the instance, id cannot repeat
+            "image_id": 8, # The id of the image where the instance is located, repeatable. This represents the presence of multiple objects on a single image
+"iscrowd": 0, # covered or not, when the value is 0, it will participate in training
+            "area": 10175 # the area occupied by the instance, can be simply taken as w * h. Note that when the value is 0, it will be skipped, and if it is too small, it will be ignored in eval
 
     ...
 ```
 
-</details>
+### Settings of configuration file
 
-
-### 配置文件设置
-
-在配置文件中，完整的含义参考[config yaml配置项说明](../../tutorials/KeyPointConfigGuide_cn.md)。以[HRNet模型配置](../../../configs/keypoint/hrnet/hrnet_w32_256x192.yml)为例，重点需要关注的内容如下：
+In the configuration file, refer to [config yaml configuration](... /... /tutorials/KeyPointConfigGuide_cn.md) for more details . Take [HRNet model configuration](... /... /... /configs/keypoint/hrnet/hrnet_w32_256x192.yml) as an example, we need to focus on following contents:
 
 <details>
-<summary><b> 配置文件示例</b></summary>
+<summary><b> Example of configuration</b></summary>
 
-一个配置文件的示例如下
-
-```yaml
+```
 use_gpu: true
 log_iter: 5
 save_dir: output
 snapshot_epoch: 10
 weights: output/hrnet_w32_256x192/model_final
 epoch: 210
-num_joints: &num_joints 5 # 预测的点数与定义点数量一致
+num_joints: &num_joints 5 # The number of predicted points matches the number of defined points
 pixel_std: &pixel_std 200
-metric: KeyPointTopDownCOCOEval
+Metric. keyPointTopDownCOCOEval
 num_classes: 1  
 train_height: &train_height 256
 train_width: &train_width 192
-trainsize: &trainsize [*train_width, *train_height]
-hmsize: &hmsize [48, 64]
-flip_perm: &flip_perm [[1, 2], [3, 4]]  # 注意只有含义上镜像对称的点才写到这里
+trainsize: &trainsize [*train_width, *train_height].
+hmsize: &hmsize [48, 64].
+flip_perm: &flip_perm [[1, 2], [3, 4]]. # Note that only points that are mirror-symmetric are recorded here.
 
 ...
 
-# 保证dataset_dir + anno_path 能正确定位到标注文件位置
-# 保证dataset_dir + image_dir + 标注文件中的图片路径能正确定位到图片
+# Ensure that dataset_dir + anno_path can correctly locate the annotation file
+# Ensure that dataset_dir + image_dir + image path in annotation file can correctly locate the image.
 TrainDataset:
   !KeypointTopDownCocoDataset
     image_dir: images
     anno_path: train_coco_joint.json
     dataset_dir: dataset/self_dataset
     num_joints: *num_joints
-    trainsize: *trainsize
+    trainsize. *trainsize
     pixel_std: *pixel_std
-    use_gt_bbox: True
+    use_gt_box: true
 
 
-EvalDataset:
+Evaluate the dataset.
   !KeypointTopDownCocoDataset
     image_dir: images
     anno_path: val_coco_joint.json
     dataset_dir: dataset/self_dataset
     bbox_file: bbox.json
     num_joints: *num_joints
-    trainsize: *trainsize
+    trainsize. *trainsize
     pixel_std: *pixel_std
-    use_gt_bbox: True
+    use_gt_box: true
     image_thre: 0.0
 ```
-</details>
 
-### 模型训练及评估
-#### 模型训练
-通过如下命令启动训练：
-```bash
+### Model Training and Evaluation
+
+#### Model Training
+
+Run the following command to start training:
+
+```
 CUDA_VISIBLE_DEVICES=0,1,2,3 python3 -m paddle.distributed.launch tools/train.py -c configs/keypoint/hrnet/hrnet_w32_256x192.yml
 ```
 
-#### 模型评估
-训练好模型之后，可以通过以下命令实现对模型指标的评估:
-```bash
+#### Model Evaluation
+
+After training the model, you can evaluate the model metrics by running the following commands:
+
+```
 python3 tools/eval.py -c configs/keypoint/hrnet/hrnet_w32_256x192.yml
 ```
 
-注意：由于测试依赖pycocotools工具，其默认为`COCO`数据集的17点，如果修改后的模型并非预测17点，直接使用评估命令会报错。
-需要修改以下内容以获得正确的评估结果：
-- [sigma列表](https://github.com/PaddlePaddle/PaddleDetection/blob/develop/ppdet/modeling/keypoint_utils.py#L219)，表示每个关键点的范围方差，越大则容忍度越高。其长度与预测点数一致。根据实际关键点可信区域设置，区域精确的一般0.25-0.5，例如眼睛。区域范围大的一般0.5-1.0，例如肩膀。若不确定建议0.75。
-- [pycocotools sigma列表](https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/cocoeval.py#L523)，含义及内容同上，取值与sigma列表一致。
+### Model Export and Inference
 
-### 模型导出及预测
-#### Top-Down模型联合部署
-```shell
-#导出关键点模型
+#### Top-Down model deployment
+
+```
+#Export keypoint model
 python tools/export_model.py -c configs/keypoint/hrnet/hrnet_w32_256x192.yml -o weights={path_to_your_weights}
 
-#detector 检测 + keypoint top-down模型联合部署（联合推理只支持top-down方式）
+#detector detection + keypoint top-down model co-deployment（for top-down solutions only）
 python deploy/python/det_keypoint_unite_infer.py --det_model_dir=output_inference/ppyolo_r50vd_dcn_2x_coco/ --keypoint_model_dir=output_inference/hrnet_w32_256x192/ --video_file=../video/xxx.mp4  --device=gpu
-```
-- 注意目前PP-Human中使用的为该方案
-
-#### Bottom-Up模型独立部署
-```shell
-#导出模型
-python tools/export_model.py -c configs/keypoint/higherhrnet/higherhrnet_hrnet_w32_512.yml -o weights=output/higherhrnet_hrnet_w32_512/model_final.pdparams
-
-#部署推理
-python deploy/python/keypoint_infer.py --model_dir=output_inference/higherhrnet_hrnet_w32_512/ --image_file=./demo/000000014439_640x640.jpg --device=gpu --threshold=0.5
-
 ```

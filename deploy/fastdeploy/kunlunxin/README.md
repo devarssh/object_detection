@@ -1,4 +1,3 @@
-[English](README.md) | 简体中文
 
 # PaddleDetection 在昆仑芯上的部署方案-FastDeploy
 
